@@ -22,7 +22,7 @@ export function getAuthGuardRedirect(path: string, hasUser: boolean): string | n
     // 2. Authenticated user trying to access public auth pages (like Login/Signup) -> Redirect to Home/Dashboard
     // Note: We don't block /api/auth because the frontend needs to call it even if logged in (e.g. sign out)
     if (hasUser && (path === "/login" || path === "/signup" || path === "/forgot-password")) {
-        return "/"; // or "/dashboard"
+        return "/dashboard";
     }
 
     return null;

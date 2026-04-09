@@ -1,226 +1,257 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import * as React from 'react';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from '@/components/ui/input';
+import { createClient } from '@/lib/supabase/client';
+import { Eye, EyeOff, Lock, Mail, UserRound } from 'lucide-react';
+
+const signupSchema = z
+  .object({
+    firstName: z.string().trim().min(2, 'First name must be at least 2 characters'),
+    lastName: z.string().trim().min(2, 'Last name must be at least 2 characters'),
+    email: z.string().trim().email('Enter a valid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(8, 'Confirm your password'),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: 'Passwords must match',
+    path: ['confirmPassword'],
+  });
+
+type SignupFormValues = z.infer<typeof signupSchema>;
+
+const getErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback;
 
 export default function SignupPage() {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
-    const router = useRouter();
+  const supabase = createClient();
+  const [authError, setAuthError] = React.useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+  const [isOAuthLoading, setIsOAuthLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
-    const handleSignup = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-        setSuccess(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
-        if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            setLoading(false);
-            return;
-        }
+  const onSubmit = async (values: SignupFormValues): Promise<void> => {
+    setAuthError(null);
+    setSuccessMessage(null);
 
-        try {
-            const res = await fetch("/api/auth/sign-up", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password, firstName, lastName }),
-            });
+    const { error } = await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: {
+        data: {
+          full_name: `${values.firstName} ${values.lastName}`.trim(),
+        },
+      },
+    });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || "Failed to sign up");
-            }
-
-            setSuccess(true);
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleGoogleLogin = async () => {
-        try {
-            window.location.href = "/api/auth/google";
-        } catch (err) {
-            console.error("Google login failed", err);
-        }
-    };
-
-
-    if (success) {
-        return (
-            <div className="w-full max-w-md mx-auto">
-                <div className="bg-white p-8 rounded-2xl border border-black/10 shadow-sm text-center">
-                    <div className="mb-4 flex justify-center">
-                        <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                    </div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
-                    <p className="text-gray-500 mb-8 text-sm">Please check your email to verify your account.</p>
-                    <Link href="/login" className="inline-flex justify-center w-full py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
-                        Back to Sign In
-                    </Link>
-                </div>
-            </div>
-        );
+    if (error) {
+      setAuthError(error.message);
+      return;
     }
 
-    return (
-        <div className="w-full max-w-md mx-auto">
-            <div className="bg-white p-8 rounded-2xl border border-black/10 shadow-sm">
-                <div className="mb-8 text-center">
-                    <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Baseline</h1>
-                    <p className="text-sm text-gray-500 mt-2">Create a new account</p>
-                </div>
+    setSuccessMessage('Check your email to confirm your account.');
+  };
 
-                {error && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-6 text-sm text-center">{error}</div>}
+  const handleGoogleSignIn = async (): Promise<void> => {
+    setAuthError(null);
+    setIsOAuthLoading(true);
 
-                <form className="space-y-5" onSubmit={handleSignup}>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
-                            <div className="mt-1">
-                                <input
-                                    id="firstName"
-                                    name="firstName"
-                                    type="text"
-                                    autoComplete="given-name"
-                                    required
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-black focus:border-black sm:text-sm text-gray-900 transition-colors"
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
-                            <div className="mt-1">
-                                <input
-                                    id="lastName"
-                                    name="lastName"
-                                    type="text"
-                                    autoComplete="family-name"
-                                    required
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-black focus:border-black sm:text-sm text-gray-900 transition-colors"
-                                />
-                            </div>
-                        </div>
-                    </div>
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
 
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                        <div className="mt-1">
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-black focus:border-black sm:text-sm text-gray-900 transition-colors"
-                                placeholder="you@example.com"
-                            />
-                        </div>
-                    </div>
+      if (error) {
+        setAuthError(error.message);
+        return;
+      }
 
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-                        <div className="mt-1">
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="new-password"
-                                required
-                                minLength={6}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-black focus:border-black sm:text-sm text-gray-900 transition-colors"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                    </div>
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: unknown) {
+      setAuthError(getErrorMessage(error, 'Failed to sign in with Google'));
+    } finally {
+      setIsOAuthLoading(false);
+    }
+  };
 
-                    <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
-                        <div className="mt-1">
-                            <input
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                type="password"
-                                autoComplete="new-password"
-                                required
-                                minLength={6}
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-black focus:border-black sm:text-sm text-gray-900 transition-colors"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                    </div>
+  const fieldClassName =
+    'h-12 border-zinc-200 bg-white pl-11 pr-11 text-base text-zinc-900 placeholder:text-zinc-400 focus-visible:border-emerald-600 focus-visible:ring-emerald-600/20';
 
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            {loading ? "Creating account..." : "Sign up"}
-                        </button>
-                    </div>
-                </form>
+  return (
+    <div className="w-full rounded-[28px] bg-white px-1 text-zinc-900">
+      <div className="mx-auto mb-10 flex w-fit items-center rounded-2xl border border-zinc-200 bg-white p-1 shadow-sm">
+        <span className="inline-flex h-11 items-center rounded-xl bg-emerald-700 px-7 text-base font-semibold text-white shadow-sm">
+          Sign Up
+        </span>
+        <Link
+          href="/login"
+          className="inline-flex h-11 items-center rounded-xl px-7 text-base font-medium text-zinc-600 transition-colors hover:text-zinc-950"
+        >
+          Log In
+        </Link>
+      </div>
 
-                <div className="mt-6">
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-200" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                        </div>
-                    </div>
+      <h1 className="text-center text-5xl font-semibold tracking-tight text-zinc-950">Create An Account</h1>
 
-                    <div className="mt-6">
-                        <button
-                            onClick={handleGoogleLogin}
-                            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors"
-                        >
-                            <svg className="w-5 h-5" aria-hidden="true" viewBox="0 0 24 24">
-                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                            </svg>
-                            Login with Google
-                        </button>
-                    </div>
-                </div>
+      {successMessage ? (
+        <div className="mt-10 space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center text-sm text-emerald-800">
+          <p>{successMessage}</p>
+          <Link
+            href="/login"
+            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 text-base font-semibold text-white transition hover:bg-emerald-800"
+          >
+            Back to Log In
+          </Link>
+        </div>
+      ) : (
+        <>
+          <form className="mt-10 space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="relative">
+                <UserRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <Input
+                  id="firstName"
+                  autoComplete="given-name"
+                  className={fieldClassName}
+                  placeholder="First Name"
+                  {...register('firstName')}
+                />
+                {errors.firstName ? <p className="mt-2 text-sm text-rose-500">{errors.firstName.message}</p> : null}
+              </div>
+              <div className="relative">
+                <UserRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <Input
+                  id="lastName"
+                  autoComplete="family-name"
+                  className={fieldClassName}
+                  placeholder="Last Name"
+                  {...register('lastName')}
+                />
+                {errors.lastName ? <p className="mt-2 text-sm text-rose-500">{errors.lastName.message}</p> : null}
+              </div>
             </div>
 
-            <p className="mt-8 text-center text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link href="/login" className="font-semibold text-black hover:underline decoration-2 underline-offset-4">
-                    Sign in now
-                </Link>
-            </p>
-        </div>
-    );
+            <div className="relative">
+              <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                className={fieldClassName}
+                placeholder="Enter Your Email"
+                {...register('email')}
+              />
+            </div>
+            {errors.email ? <p className="text-sm text-rose-500">{errors.email.message}</p> : null}
+
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                className={fieldClassName}
+                placeholder="Password"
+                {...register('password')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-md p-1 text-zinc-500 transition hover:text-zinc-900"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.password ? <p className="text-sm text-rose-500">{errors.password.message}</p> : null}
+
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                className={fieldClassName}
+                placeholder="Confirm Password"
+                {...register('confirmPassword')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((value) => !value)}
+                className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-md p-1 text-zinc-500 transition hover:text-zinc-900"
+                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.confirmPassword ? <p className="text-sm text-rose-500">{errors.confirmPassword.message}</p> : null}
+
+            {authError ? <p className="text-sm text-rose-500">{authError}</p> : null}
+
+            <button
+              type="submit"
+              className="mt-1 inline-flex h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 text-lg font-semibold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-65"
+              disabled={isSubmitting || isOAuthLoading}
+            >
+              {isSubmitting ? 'Creating Account...' : 'Create an Account'}
+            </button>
+          </form>
+
+          <div className="my-8 flex items-center gap-4">
+            <div className="h-px flex-1 bg-zinc-200" />
+            <span className="text-sm text-zinc-500">Or</span>
+            <div className="h-px flex-1 bg-zinc-200" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isSubmitting || isOAuthLoading}
+              className="inline-flex h-11 items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white text-base font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-65"
+            >
+              {isOAuthLoading ? (
+                'Connecting...'
+              ) : (
+                <>
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M21.35 11.1H12.18v2.94h5.29c-.23 1.4-.89 2.58-1.98 3.37v2.8h3.21c1.88-1.73 2.97-4.29 2.97-7.33 0-.69-.06-1.35-.32-1.78z" />
+                    <path fill="#34A853" d="M12.18 22c2.7 0 4.96-.89 6.61-2.42l-3.21-2.8c-.88.59-2 .96-3.4.96-2.61 0-4.83-1.76-5.62-4.13H3.27v2.9C4.9 19.64 8.27 22 12.18 22z" />
+                    <path fill="#FBBC05" d="M6.56 13.61c-.2-.59-.32-1.22-.32-1.87s.12-1.28.32-1.87V7h-3.29A9.93 9.93 0 0 0 2.3 11.74c0 1.59.38 3.09 1.05 4.42l3.21-2.55z" />
+                    <path fill="#EA4335" d="M12.18 5.47c1.47 0 2.79.51 3.83 1.51l2.86-2.86C16.96 2.47 14.81 1.55 12.18 1.55 8.27 1.55 4.9 3.91 3.27 7.1l3.29 2.54c.79-2.38 3.01-4.17 5.62-4.17z" />
+                  </svg>
+                  Continue with Google
+                </>
+              )}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }

@@ -1,0 +1,234 @@
+import { z } from 'zod';
+import type * as ResumeTypes from '../types/resume';
+
+const internationalPhoneRegex = /^\+?[0-9\s().-]{7,20}$/;
+
+const hasAtLeastSevenDigits = (value: string): boolean => {
+  const digits = value.replace(/\D/g, '');
+  return digits.length >= 7;
+};
+
+const isValidDateString = (value: string): boolean => {
+  const date = new Date(value);
+  return !Number.isNaN(date.getTime());
+};
+
+const nonEmptyStringSchema = z.string().trim().min(1, 'This field is required');
+const draftStringSchema = z.string().trim().min(0).default('');
+
+const urlOrEmptyStringSchema = z.union([
+  z.literal(''),
+  z.string().url('Must be a valid URL'),
+]);
+
+const optionalUrlSchema = z.union([urlOrEmptyStringSchema, z.undefined()]);
+
+const nullableDateStringSchema = z.union([
+  z.string().refine(isValidDateString, 'Must be a valid date string'),
+  z.null(),
+]);
+
+const requiredDateStringSchema = z
+  .string()
+  .refine(isValidDateString, 'Must be a valid date string');
+
+export const personalInfoSchema = z.object({
+  type: z.literal('personal_info'),
+  fullName: draftStringSchema,
+  jobTitle: draftStringSchema,
+  email: z.union([z.string().trim().email('Must be a valid email'), z.literal('')]).default(''),
+  phone: z
+    .string()
+    .trim()
+    .default('')
+    .refine(
+      (value: string) =>
+        value === '' || (internationalPhoneRegex.test(value) && hasAtLeastSevenDigits(value)),
+      'Must be a valid international phone number'
+    ),
+  location: draftStringSchema,
+  website: optionalUrlSchema,
+  linkedin: optionalUrlSchema,
+  github: optionalUrlSchema,
+  summary: draftStringSchema,
+  avatarUrl: optionalUrlSchema,
+});
+
+export const experienceSchema = z.object({
+  type: z.literal('experience'),
+  company: nonEmptyStringSchema,
+  position: nonEmptyStringSchema,
+  location: nonEmptyStringSchema,
+  startDate: nullableDateStringSchema,
+  endDate: nullableDateStringSchema,
+  isCurrent: z.boolean(),
+  description: nonEmptyStringSchema,
+  achievements: z.array(nonEmptyStringSchema),
+});
+
+export const educationSchema = z.object({
+  type: z.literal('education'),
+  institution: nonEmptyStringSchema,
+  degree: nonEmptyStringSchema,
+  field: nonEmptyStringSchema,
+  location: nonEmptyStringSchema,
+  startDate: nullableDateStringSchema,
+  endDate: nullableDateStringSchema,
+  isCurrent: z.boolean(),
+  gpa: z.union([z.string(), z.undefined()]),
+  achievements: z.array(nonEmptyStringSchema),
+});
+
+export const skillLevelSchema = z.enum([
+  'beginner',
+  'intermediate',
+  'advanced',
+  'expert',
+]);
+
+export const skillSchema = z.object({
+  type: z.literal('skills'),
+  name: nonEmptyStringSchema,
+  level: skillLevelSchema,
+  category: nonEmptyStringSchema,
+});
+
+export const projectSchema = z.object({
+  type: z.literal('projects'),
+  name: nonEmptyStringSchema,
+  description: nonEmptyStringSchema,
+  technologies: z.array(z.string()),
+  url: optionalUrlSchema,
+  githubUrl: optionalUrlSchema,
+  startDate: nullableDateStringSchema,
+  endDate: nullableDateStringSchema,
+  isCurrent: z.boolean(),
+});
+
+export const certificationSchema = z.object({
+  type: z.literal('certifications'),
+  name: nonEmptyStringSchema,
+  issuer: nonEmptyStringSchema,
+  issueDate: requiredDateStringSchema,
+  expiryDate: requiredDateStringSchema,
+  credentialId: z.union([z.string(), z.undefined()]),
+  url: optionalUrlSchema,
+});
+
+export const languageProficiencySchema = z.enum([
+  'elementary',
+  'limited_working',
+  'professional_working',
+  'full_professional',
+  'native',
+]);
+
+export const languageSchema = z.object({
+  type: z.literal('languages'),
+  name: nonEmptyStringSchema,
+  proficiency: languageProficiencySchema,
+});
+
+export const customSchema = z.object({
+  type: z.literal('custom'),
+  title: nonEmptyStringSchema,
+  content: nonEmptyStringSchema,
+});
+
+export const sectionItemDataSchema = z.discriminatedUnion('type', [
+  personalInfoSchema,
+  experienceSchema,
+  educationSchema,
+  skillSchema,
+  projectSchema,
+  certificationSchema,
+  languageSchema,
+  customSchema,
+]);
+
+const sectionItemSchema = z.object({
+  id: nonEmptyStringSchema,
+  sectionId: nonEmptyStringSchema,
+  resumeId: nonEmptyStringSchema,
+  sortOrder: z.number().int().nonnegative(),
+  type: z.enum([
+    'personal_info',
+    'experience',
+    'education',
+    'skills',
+    'projects',
+    'certifications',
+    'languages',
+    'custom',
+  ]),
+  data: sectionItemDataSchema,
+  createdAt: nonEmptyStringSchema,
+  updatedAt: nonEmptyStringSchema,
+});
+
+const resumeSectionSchema = z.object({
+  id: nonEmptyStringSchema,
+  resumeId: nonEmptyStringSchema,
+  type: z.enum([
+    'personal_info',
+    'experience',
+    'education',
+    'skills',
+    'projects',
+    'certifications',
+    'languages',
+    'custom',
+  ]),
+  title: nonEmptyStringSchema,
+  isVisible: z.boolean(),
+  sortOrder: z.number().int().nonnegative(),
+  items: z.array(sectionItemSchema),
+  createdAt: nonEmptyStringSchema,
+  updatedAt: nonEmptyStringSchema,
+});
+
+export const resumeSchema = z.object({
+  id: nonEmptyStringSchema,
+  userId: nonEmptyStringSchema,
+  title: nonEmptyStringSchema,
+  templateId: z.enum([
+    'modern',
+    'classic',
+    'minimal',
+    'creative',
+    'executive',
+  ]),
+  sections: z.array(resumeSectionSchema),
+  createdAt: nonEmptyStringSchema,
+  updatedAt: nonEmptyStringSchema,
+});
+
+export type PersonalInfoSchemaType = z.infer<typeof personalInfoSchema>;
+export type ExperienceSchemaType = z.infer<typeof experienceSchema>;
+export type EducationSchemaType = z.infer<typeof educationSchema>;
+export type SkillSchemaType = z.infer<typeof skillSchema>;
+export type ProjectSchemaType = z.infer<typeof projectSchema>;
+export type CertificationSchemaType = z.infer<typeof certificationSchema>;
+export type LanguageSchemaType = z.infer<typeof languageSchema>;
+export type CustomSchemaType = z.infer<typeof customSchema>;
+export type SectionItemDataSchemaType = z.infer<typeof sectionItemDataSchema>;
+export type ResumeSchemaType = z.infer<typeof resumeSchema>;
+
+export type ImportedResumeTypes = {
+  TemplateId: ResumeTypes.TemplateId;
+  SectionType: ResumeTypes.SectionType;
+  Resume: ResumeTypes.Resume;
+  ResumeSection: ResumeTypes.ResumeSection;
+  SectionItem: ResumeTypes.SectionItem;
+  SectionItemData: ResumeTypes.SectionItemData;
+  PersonalInfoData: ResumeTypes.PersonalInfoData;
+  ExperienceData: ResumeTypes.ExperienceData;
+  EducationData: ResumeTypes.EducationData;
+  SkillData: ResumeTypes.SkillData;
+  ProjectData: ResumeTypes.ProjectData;
+  CertificationData: ResumeTypes.CertificationData;
+  LanguageData: ResumeTypes.LanguageData;
+  CustomData: ResumeTypes.CustomData;
+  Template: ResumeTypes.Template;
+  DragItem: ResumeTypes.DragItem;
+};
