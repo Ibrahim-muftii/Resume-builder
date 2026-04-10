@@ -44,9 +44,9 @@ type SectionItemRow = {
 };
 
 type RouteParams = {
-  params: {
+  params: Promise<{
     resumeId: string;
-  };
+  }>;
 };
 
 const resumeIdSchema = z.string().uuid();
@@ -168,18 +168,29 @@ export async function GET(
   _request: NextRequest,
   context: RouteParams
 ): Promise<NextResponse> {
-  const resumeIdResult = resumeIdSchema.safeParse(context.params.resumeId);
-
-  if (!resumeIdResult.success) {
-    return jsonError('Invalid resume id', 400);
-  }
-
   try {
+    const params = await context.params;
+    const resumeIdResult = resumeIdSchema.safeParse(params.resumeId);
+
+    if (!resumeIdResult.success) {
+      return jsonError('Invalid resume id', 400);
+    }
+
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return jsonError('Unauthorized', 401);
+    }
+
     const resume = await loadResume(supabase, resumeIdResult.data);
 
     if (!resume) {
       return jsonError('Resume not found', 404);
+    }
+
+    if (resume.userId !== user.id) {
+       return jsonError('Forbidden', 403);
     }
 
     return NextResponse.json({ resume });
@@ -193,24 +204,32 @@ export async function PUT(
   request: NextRequest,
   context: RouteParams
 ): Promise<NextResponse> {
-  const resumeIdResult = resumeIdSchema.safeParse(context.params.resumeId);
-
-  if (!resumeIdResult.success) {
-    return jsonError('Invalid resume id', 400);
-  }
-
-  const payload: unknown = await request.json();
-  const parsedResume = resumeSchema.safeParse(payload);
-
-  if (!parsedResume.success) {
-    return jsonError('Invalid resume payload', 400);
-  }
-
-  if (parsedResume.data.id !== resumeIdResult.data) {
-    return jsonError('Resume id mismatch', 400);
-  }
-
   try {
+    const params = await context.params;
+    const resumeIdResult = resumeIdSchema.safeParse(params.resumeId);
+
+    if (!resumeIdResult.success) {
+      return jsonError('Invalid resume id', 400);
+    }
+
+    let payload: any;
+    try {
+      payload = await request.json();
+    } catch (parseError) {
+      console.error('JSON Parse Error:', parseError);
+      return jsonError('Invalid JSON payload or unsupported escape sequence', 400);
+    }
+    const parsedResume = resumeSchema.safeParse(payload);
+
+    if (!parsedResume.success) {
+      console.error('Resume validation failed:', parsedResume.error);
+      return jsonError('Invalid resume payload', 400);
+    }
+
+    if (parsedResume.data.id !== resumeIdResult.data) {
+      return jsonError('Resume id mismatch', 400);
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -342,6 +361,122 @@ export async function PUT(
     return NextResponse.json({ resume: refreshedResume });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to save resume';
+    return jsonError(message, 500);
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  context: RouteParams
+): Promise<NextResponse> {
+  try {
+    const params = await context.params;
+    const resumeIdResult = resumeIdSchema.safeParse(params.resumeId);
+
+    if (!resumeIdResult.success) {
+      return jsonError('Invalid resume id', 400);
+    }
+
+    let payload: any;
+    try {
+      payload = await request.json();
+    } catch (parseError) {
+      console.error('JSON Parse Error:', parseError);
+      return jsonError('Invalid JSON payload or unsupported escape sequence', 400);
+    }
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return jsonError('Unauthorized', 401);
+    }
+
+    // Verify ownership
+    const { data: resume, error: fetchError } = await supabase
+      .from('resumes')
+      .select('user_id')
+      .eq('id', resumeIdResult.data)
+      .maybeSingle();
+
+    if (fetchError || !resume) {
+      return jsonError('Resume not found', 404);
+    }
+
+    if (resume.user_id !== user.id) {
+       return jsonError('Forbidden', 403);
+    }
+
+    const updatePayload: any = {};
+    if ('title' in (payload as any)) updatePayload.title = (payload as any).title;
+    if ('templateId' in (payload as any)) updatePayload.template_id = (payload as any).templateId;
+    if ('isPublic' in (payload as any)) updatePayload.is_public = (payload as any).isPublic;
+
+    const { error: updateError } = await supabase
+      .from('resumes')
+      .update({
+        ...updatePayload,
+        last_edited_at: new Date().toISOString(),
+      })
+      .eq('id', resumeIdResult.data);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    const updated = await loadResume(supabase, resumeIdResult.data);
+    return NextResponse.json({ resume: updated });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update resume';
+    return jsonError(message, 500);
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  context: RouteParams
+): Promise<NextResponse> {
+  try {
+    const params = await context.params;
+    const resumeIdResult = resumeIdSchema.safeParse(params.resumeId);
+
+    if (!resumeIdResult.success) {
+      return jsonError('Invalid resume id', 400);
+    }
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return jsonError('Unauthorized', 401);
+    }
+
+    // Verify ownership before delete
+    const { data: resume, error: fetchError } = await supabase
+      .from('resumes')
+      .select('user_id')
+      .eq('id', resumeIdResult.data)
+      .maybeSingle();
+
+    if (fetchError || !resume) {
+      return jsonError('Resume not found', 404);
+    }
+
+    if (resume.user_id !== user.id) {
+      return jsonError('Forbidden', 403);
+    }
+
+    const { error: deleteError } = await supabase
+      .from('resumes')
+      .delete()
+      .eq('id', resumeIdResult.data);
+
+    if (deleteError) {
+      throw new Error(deleteError.message);
+    }
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to delete resume';
     return jsonError(message, 500);
   }
 }

@@ -91,9 +91,9 @@ export default function CertificationsSection({ item, onSave, onCancel }: Sectio
         </div>
       </div>
 
-      <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
+      <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4">
+        <Button type="submit" disabled={isSubmitting} className="w-full bg-emerald-600 text-white hover:bg-emerald-700">{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
+        <Button type="button" variant="outline" onClick={onCancel} className="w-full">Cancel</Button>
       </div>
     </form>
   );

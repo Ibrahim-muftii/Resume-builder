@@ -16,9 +16,14 @@ export function SignOutButton() {
     };
 
     return (
-        <Button type="button" variant="outline" className="w-full justify-center border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" onClick={handleSignOut}>
+        <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full gap-3 justify-center rounded-2xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-bold transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-red-600" 
+            onClick={handleSignOut}
+        >
             <LogOut className="h-4 w-4" />
-            Sign out
+            Sign Out
         </Button>
     );
 }

@@ -80,30 +80,30 @@ export default function DraggableSection({ section, isSelected, children }: Drag
 
   return (
     <>
-      <motion.div
+      <div
         ref={setNodeRef}
-        layout
         style={style}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
         className={cn(
           'group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all',
-          isSelected && 'ring-2 ring-indigo-400 shadow-md',
+          isSelected && 'shadow-[inset_4px_0_0_0_rgb(5,150,105)] border-emerald-300 shadow-md',
           isDragging && 'opacity-50 shadow-lg'
         )}
+        {...attributes}
+        {...(isPersonalInfo ? {} : listeners)}
       >
-        <div
+        <motion.div
+          layout
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
           className={cn(
             'flex cursor-grab items-center gap-2 border-b border-zinc-200 px-3 py-3 transition-colors active:cursor-grabbing',
-            !isPersonalInfo && 'hover:bg-indigo-50',
+            !isPersonalInfo && 'hover:bg-emerald-50',
             isPersonalInfo && 'cursor-default'
           )}
-          {...attributes}
-          {...(isPersonalInfo ? {} : listeners)}
         >
           {!isPersonalInfo && (
-            <GripVertical className="h-5 w-5 flex-shrink-0 text-zinc-400 transition-colors group-hover:text-indigo-500" />
+            <GripVertical className="h-5 w-5 flex-shrink-0 text-zinc-400 transition-colors group-hover:text-emerald-500" />
           )}
           <button
             type="button"
@@ -150,7 +150,7 @@ export default function DraggableSection({ section, isSelected, children }: Drag
               <Trash2 className="h-4 w-4" />
             </Button>
           ) : null}
-        </div>
+        </motion.div>
 
         <AnimatePresence initial={false}>
           {!collapsed ? (
@@ -166,7 +166,7 @@ export default function DraggableSection({ section, isSelected, children }: Drag
             </motion.div>
           ) : null}
         </AnimatePresence>
-      </motion.div>
+      </div>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>

@@ -3,7 +3,8 @@ export type TemplateId =
   | 'classic'
   | 'minimal'
   | 'creative'
-  | 'executive';
+  | 'executive'
+  | 'professional';
 
 export type SectionType =
   | 'personal_info'

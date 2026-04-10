@@ -11,7 +11,7 @@ const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
   default: buttonVariants('default'),
   outline: buttonVariants('outline'),
   ghost:
-    'inline-flex items-center justify-center rounded-md bg-transparent text-zinc-950 hover:bg-zinc-100 dark:text-zinc-50 dark:hover:bg-zinc-900',
+    'inline-flex items-center justify-center rounded-md bg-transparent text-zinc-950 hover:bg-zinc-100',
 };
 
 const sizeClasses: Record<NonNullable<ButtonProps['size']>, string> = {

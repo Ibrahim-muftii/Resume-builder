@@ -46,33 +46,33 @@ export default function SkillsSection({ item, onSave, onCancel }: SectionFormPro
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(submit)}>
+    <form className="space-y-5" onSubmit={handleSubmit(submit)}>
       <div className="space-y-2">
-        <Label htmlFor="name">Skill Name</Label>
-        <Input id="name" {...register('name')} />
-        {errors.name ? <p className="text-sm text-red-500">{errors.name.message}</p> : null}
+        <Label htmlFor="name" className="font-semibold text-zinc-800">Skill Name</Label>
+        <Input id="name" placeholder="e.g., React, Python, TypeScript" {...register('name')} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
+        {errors.name ? <p className="text-xs font-medium text-red-500">{errors.name.message}</p> : null}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="level">Level</Label>
-        <Select id="level" {...register('level')}>
+        <Label htmlFor="level" className="font-semibold text-zinc-800">Proficiency Level</Label>
+        <Select id="level" {...register('level')} className="border-zinc-200 bg-zinc-50 focus:bg-white">
           <option value="beginner">Beginner</option>
           <option value="intermediate">Intermediate</option>
           <option value="advanced">Advanced</option>
           <option value="expert">Expert</option>
         </Select>
-        {errors.level ? <p className="text-sm text-red-500">{errors.level.message}</p> : null}
+        {errors.level ? <p className="text-xs font-medium text-red-500">{errors.level.message}</p> : null}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">Category</Label>
-        <Input id="category" {...register('category')} />
-        {errors.category ? <p className="text-sm text-red-500">{errors.category.message}</p> : null}
+        <Label htmlFor="category" className="font-semibold text-zinc-800">Category</Label>
+        <Input id="category" placeholder="e.g., Frontend, Backend, DevOps" {...register('category')} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
+        {errors.category ? <p className="text-xs font-medium text-red-500">{errors.category.message}</p> : null}
       </div>
 
-      <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
+      <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4">
+        <Button type="submit" disabled={isSubmitting} className="w-full bg-emerald-600 text-white hover:bg-emerald-700">{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
+        <Button type="button" variant="outline" onClick={onCancel} className="w-full">Cancel</Button>
       </div>
     </form>
   );

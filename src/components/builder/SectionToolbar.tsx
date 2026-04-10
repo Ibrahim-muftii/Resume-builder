@@ -66,13 +66,13 @@ export default function SectionToolbar() {
               type="button"
               onClick={() => setActiveSection(section.id)}
               className={cn(
-                'group flex w-full items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-all',
+                'group relative flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all',
                 isActive
-                  ? 'border-indigo-300 bg-indigo-50 shadow-sm'
-                  : 'border-zinc-200 bg-white hover:border-indigo-200 hover:bg-indigo-50'
+                  ? 'border-emerald-300 bg-emerald-50 shadow-[inset_4px_0_0_0_rgb(5,150,105)] shadow-sm'
+                  : 'border-zinc-200 bg-white hover:border-emerald-200 hover:bg-emerald-50'
               )}
             >
-              <Icon className={cn('h-5 w-5 shrink-0', isActive ? 'text-indigo-600' : 'text-zinc-500')} />
+              <Icon className={cn('h-5 w-5 shrink-0', isActive ? 'text-emerald-600' : 'text-zinc-500')} />
               <div className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium text-zinc-900">
                   {section.title}
@@ -94,7 +94,7 @@ export default function SectionToolbar() {
                 }}
                 className={cn(
                   'shrink-0 rounded-md p-1.5 transition-colors',
-                  isActive ? 'text-indigo-600 hover:bg-indigo-100' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'
+                  isActive ? 'text-emerald-600 hover:bg-emerald-100' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'
                 )}
               >
                 {section.isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
@@ -107,7 +107,7 @@ export default function SectionToolbar() {
       <div className="mt-4 space-y-2 border-t border-zinc-200 pt-4">
         <Button
           type="button"
-          className="w-full bg-indigo-600 hover:bg-indigo-700"
+          className="w-full bg-emerald-600 hover:bg-emerald-700"
           onClick={() => setIsAddSectionModalOpen(true)}
         >
           + Add Section

@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
-import { SECTION_TYPE_META, getDefaultSectionItem } from '../../../../lib/utils/sectionDefaults';
+import { SECTION_TYPE_META } from '../../../../lib/utils/sectionDefaults';
+import { getSampleSectionItem } from '../../../../lib/utils/sampleData';
 import { logger } from '../../../../lib/utils/logger';
 import type {
   Resume,
@@ -53,6 +54,7 @@ const defaultSectionOrder: SectionType[] = [
   'experience',
   'education',
   'skills',
+  'projects',
 ];
 
 const jsonError = (message: string, status: number): NextResponse =>
@@ -94,7 +96,7 @@ const mapResume = (
       const itemData =
         parsedData.success && parsedData.data.type === section.type
           ? parsedData.data
-          : getDefaultSectionItem(section.type);
+          : getSampleSectionItem(section.type);
 
       return {
         id: item.id,
@@ -132,59 +134,6 @@ const mapResume = (
   };
 };
 
-const loadOwnedResume = async (
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  resumeId: string
-): Promise<Resume | null> => {
-  const { data: resumeRow, error: resumeError } = await supabase
-    .from('resumes')
-    .select('*')
-    .eq('id', resumeId)
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  if (resumeError) {
-    throw new Error(resumeError.message);
-  }
-
-  if (!resumeRow) {
-    return null;
-  }
-
-  const { data: sections, error: sectionsError } = await supabase
-    .from('resume_sections')
-    .select('*')
-    .eq('resume_id', resumeId)
-    .order('position', { ascending: true });
-
-  if (sectionsError) {
-    throw new Error(sectionsError.message);
-  }
-
-  const sectionRows = (sections ?? []) as ResumeSectionRow[];
-  const sectionIds = sectionRows.map((section) => section.id);
-
-  const itemsQuery = supabase
-    .from('section_items')
-    .select('*')
-    .order('section_id', { ascending: true })
-    .order('position', { ascending: true });
-
-  const { data: items, error: itemsError } =
-    sectionIds.length > 0 ? await itemsQuery.in('section_id', sectionIds) : { data: [], error: null };
-
-  if (itemsError) {
-    throw new Error(itemsError.message);
-  }
-
-  return mapResume(
-    resumeRow as ResumeRow,
-    sectionRows,
-    (items ?? []) as SectionItemRow[]
-  );
-};
-
 const loadResumeList = async (
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string
@@ -200,17 +149,15 @@ const loadResumeList = async (
   }
 
   const typedResumes = (resumeRows ?? []) as ResumeRow[];
+  if (typedResumes.length === 0) return [];
+
   const resumeIds = typedResumes.map((resume) => resume.id);
 
-  const { data: sectionRows, error: sectionsError } =
-    resumeIds.length > 0
-      ? await supabase
-          .from('resume_sections')
-          .select('*')
-          .in('resume_id', resumeIds)
-          .order('resume_id', { ascending: true })
-          .order('position', { ascending: true })
-      : { data: [], error: null as null };
+  const { data: sectionRows, error: sectionsError } = await supabase
+    .from('resume_sections')
+    .select('*')
+    .in('resume_id', resumeIds)
+    .order('position', { ascending: true });
 
   if (sectionsError) {
     throw new Error(sectionsError.message);
@@ -225,9 +172,8 @@ const loadResumeList = async (
           .from('section_items')
           .select('*')
           .in('section_id', sectionIds)
-          .order('section_id', { ascending: true })
           .order('position', { ascending: true })
-      : { data: [], error: null as null };
+      : { data: [], error: null };
 
   if (itemsError) {
     throw new Error(itemsError.message);
@@ -253,7 +199,7 @@ const createDefaultResumeStructure = async (
 ): Promise<Resume> => {
   const insertPayload = {
     user_id: userId,
-    ...(title ? { title } : {}),
+    title: title || 'Untitled Resume',
     template_id: 'modern' as const,
   };
 
@@ -272,7 +218,7 @@ const createDefaultResumeStructure = async (
       const sectionId = crypto.randomUUID();
       const itemId = crypto.randomUUID();
       const timestamp = new Date().toISOString();
-      const itemData = getDefaultSectionItem(type);
+      const itemData = getSampleSectionItem(type);
 
       const sectionInsert = {
         id: sectionId,
@@ -283,17 +229,15 @@ const createDefaultResumeStructure = async (
         is_visible: true,
       };
 
-      const { data: insertedSection, error: sectionInsertError } = await supabase
+      const { error: sectionInsertError } = await supabase
         .from('resume_sections')
-        .insert(sectionInsert)
-        .select('*')
-        .single();
+        .insert(sectionInsert);
 
-      if (sectionInsertError || !insertedSection) {
-        throw new Error(sectionInsertError?.message ?? 'Failed to create resume section');
+      if (sectionInsertError) {
+        throw new Error(sectionInsertError.message);
       }
 
-      const { data: insertedItem, error: itemInsertError } = await supabase
+      const { error: itemInsertError } = await supabase
         .from('section_items')
         .insert({
           id: itemId,
@@ -302,12 +246,10 @@ const createDefaultResumeStructure = async (
           data: itemData,
           created_at: timestamp,
           updated_at: timestamp,
-        })
-        .select('*')
-        .single();
+        });
 
-      if (itemInsertError || !insertedItem) {
-        throw new Error(itemInsertError?.message ?? 'Failed to create resume item');
+      if (itemInsertError) {
+        throw new Error(itemInsertError.message);
       }
     }
   } catch (error) {
@@ -316,13 +258,26 @@ const createDefaultResumeStructure = async (
     throw error;
   }
 
-  const loadedResume = await loadOwnedResume(supabase, userId, createdResume.id);
+  // Load the full structure to return
+  const { data: sections } = await supabase
+    .from('resume_sections')
+    .select('*')
+    .eq('resume_id', createdResume.id)
+    .order('position', { ascending: true });
+  
+  const sectionRows = (sections ?? []) as ResumeSectionRow[];
+  const sectionIds = sectionRows.map(s => s.id);
+  
+  const { data: items } = await supabase
+    .from('section_items')
+    .select('*')
+    .in('section_id', sectionIds);
 
-  if (!loadedResume) {
-    throw new Error('Failed to load created resume');
-  }
-
-  return loadedResume;
+  return mapResume(
+    createdResume as ResumeRow,
+    sectionRows,
+    (items ?? []) as SectionItemRow[]
+  );
 };
 
 export async function GET(): Promise<NextResponse> {
@@ -336,7 +291,7 @@ export async function GET(): Promise<NextResponse> {
 
     const typedResumes = await loadResumeList(supabase, user.id);
 
-    return NextResponse.json<Resume[]>(typedResumes);
+    return NextResponse.json(typedResumes);
   } catch (error: unknown) {
     logger.error('Failed to list resumes', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch resumes';

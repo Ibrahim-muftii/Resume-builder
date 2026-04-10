@@ -32,14 +32,17 @@ type BaseDragState = {
 };
 
 const normalizeSectionOrder = (sections: ResumeSection[]): ResumeSection[] => {
-  const orderedSections = [...sections].sort((left, right) => left.sortOrder - right.sortOrder);
+  // Work with the array order directly, not by sortOrder (which is outdated)
+  let orderedSections = [...sections];
   const personalInfoIndex = orderedSections.findIndex((section) => section.type === 'personal_info');
 
+  // Move personal_info to the front if it's not already
   if (personalInfoIndex > 0) {
     const [personalInfoSection] = orderedSections.splice(personalInfoIndex, 1);
     orderedSections.unshift(personalInfoSection);
   }
 
+  // Update sortOrder to match array position
   return orderedSections.map((section, index) => ({
     ...section,
     sortOrder: index,
@@ -86,7 +89,6 @@ export function useSectionDrag(): DragHookResult {
   const reorderSections = useResumeStore((state) => state.reorderSections);
   const setActiveSection = useResumeStore((state) => state.setActiveSection);
   const setDirty = useResumeStore((state) => state.setDirty);
-  const setSaveError = useResumeStore((state) => state.setSaveError);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent): void => {
@@ -120,10 +122,27 @@ export function useSectionDrag(): DragHookResult {
         arrayMove(orderedSections, activeIndex, overIndex)
       );
 
+      // Update local state
       reorderSections(nextSections);
+      setDirty(true);
+
+      // Persist to API
+      fetch(`/api/resume/${resume.id}/reorder`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sections: nextSections.map((section) => ({
+            id: section.id,
+            sortOrder: section.sortOrder,
+          })),
+        }),
+      }).catch((error) => {
+        console.error('Failed to persist section order:', error);
+      });
+
       clearActiveId();
     },
-    [clearActiveId, reorderSections, resume, setActiveSection]
+    [clearActiveId, reorderSections, resume, setActiveSection, setDirty]
   );
 
   return {
@@ -142,7 +161,6 @@ export function useItemDrag(sectionId: string | null): DragHookResult {
   const reorderItems = useResumeStore((state) => state.reorderItems);
   const setActiveItem = useResumeStore((state) => state.setActiveItem);
   const setDirty = useResumeStore((state) => state.setDirty);
-  const setSaveError = useResumeStore((state) => state.setSaveError);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent): void => {
@@ -185,10 +203,32 @@ export function useItemDrag(sectionId: string | null): DragHookResult {
         sortOrder: index,
       }));
 
+      // Update local state
       reorderItems(sectionId, nextItems);
+      setDirty(true);
+
+      // Persist to API
+      fetch(`/api/resume/${resume.id}/reorder`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [
+            {
+              sectionId,
+              items: nextItems.map((item) => ({
+                id: item.id,
+                sortOrder: item.sortOrder,
+              })),
+            },
+          ],
+        }),
+      }).catch((error) => {
+        console.error('Failed to persist item order:', error);
+      });
+
       clearActiveId();
     },
-    [clearActiveId, reorderItems, resume, sectionId, setActiveItem]
+    [clearActiveId, reorderItems, resume, sectionId, setActiveItem, setDirty]
   );
 
   return {

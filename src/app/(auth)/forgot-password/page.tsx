@@ -67,15 +67,15 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <Card className="border-zinc-200 bg-white/95 shadow-lg backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+      <Card className="border-zinc-200 bg-white/95 shadow-lg backdrop-blur">
         <CardContent className="pt-6">
           <div className="space-y-6 text-center">
-            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-300">
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
               We sent a password reset link to <span className="font-medium">{submittedEmail}</span>.
             </div>
             <Link
               href="/login"
-              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
             >
               Back to sign in
             </Link>
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <Card className="border-zinc-200 bg-white/95 shadow-lg backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+    <Card className="border-zinc-200 bg-white/95 shadow-lg backdrop-blur">
       <CardHeader className="space-y-2 text-center">
         <CardTitle>Reset your password</CardTitle>
         <CardDescription>Enter the email address associated with your account.</CardDescription>
@@ -108,7 +108,7 @@ export default function ForgotPasswordPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <Link href="/login" className="text-sm font-medium text-zinc-500 hover:text-zinc-950 dark:hover:text-zinc-50">
+          <Link href="/login" className="text-sm font-medium text-zinc-500 hover:text-zinc-950">
             Back to sign in
           </Link>
         </div>

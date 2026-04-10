@@ -1,122 +1,65 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useResumeStore } from '../stores/resumeStore';
-import type { Resume } from '../types/resume';
 
-type UseAutoSaveResult = {
-  isSaving: boolean;
-  saveError: string | null;
-  forceSave: () => Promise<boolean>;
-};
-
-const wait = (durationMs: number): Promise<void> =>
-  new Promise((resolve) => {
-    window.setTimeout(resolve, durationMs);
-  });
-
-const getErrorMessage = (payload: unknown, fallback: string): string => {
-  if (typeof payload === 'object' && payload !== null && 'error' in payload) {
-    const message = payload.error;
-    if (typeof message === 'string' && message.length > 0) {
-      return message;
-    }
-  }
-
-  return fallback;
-};
-
-const saveResume = async (resume: Resume): Promise<void> => {
-  const response = await fetch(`/api/resumes/${resume.id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(resume),
-  });
-
-  const payload: unknown = await response.json();
-
-  if (!response.ok) {
-    throw new Error(getErrorMessage(payload, 'Failed to save resume'));
-  }
-};
-
-export function useAutoSave(): UseAutoSaveResult {
+/**
+ * Hook to automatically save the resume state to the database when changes occur.
+ * Uses a debounce mechanism to avoid excessive API calls.
+ */
+export function useAutoSave() {
   const resume = useResumeStore((state) => state.resume);
   const isDirty = useResumeStore((state) => state.isDirty);
-  const isSaving = useResumeStore((state) => state.isSaving);
-  const saveError = useResumeStore((state) => state.saveError);
-  const setSaving = useResumeStore((state) => state.setSaving);
   const setDirty = useResumeStore((state) => state.setDirty);
+  const setSaving = useResumeStore((state) => state.setSaving);
   const setSaveError = useResumeStore((state) => state.setSaveError);
-  const debounceTimerRef = useRef<number | null>(null);
+  
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const persist = useCallback(
-    async (resumeToSave: Resume): Promise<boolean> => {
+  useEffect(() => {
+    // Only save if there are changes and we have a resume
+    if (!isDirty || !resume) {
+      return;
+    }
+
+    // Clear existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    // Set a new timer for debouncing (2 seconds)
+    timerRef.current = setTimeout(async () => {
       setSaving(true);
+      setSaveError(null);
 
       try {
-        for (let attempt = 0; attempt < 4; attempt += 1) {
-          try {
-            await saveResume(resumeToSave);
-            setSaveError(null);
-            setDirty(false);
-            return true;
-          } catch (error) {
-            const message =
-              error instanceof Error ? error.message : 'Failed to save resume';
-            setSaveError(message);
+        const response = await fetch(`/api/resumes/${resume.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(resume),
+        });
 
-            if (attempt === 3) {
-              return false;
-            }
-
-            await wait(1000 * 2 ** attempt);
-          }
+        if (!response.ok) {
+          const payload = await response.json();
+          throw new Error(payload.error || 'Failed to auto-save resume');
         }
 
-        return false;
+        // Reset dirty flag after successful save
+        setDirty(false);
+      } catch (error) {
+        console.error('Auto-save error:', error);
+        setSaveError(error instanceof Error ? error.message : 'Unknown error during save');
       } finally {
         setSaving(false);
       }
-    },
-    [setDirty, setSaveError, setSaving]
-  );
-
-  const forceSave = useCallback(async (): Promise<boolean> => {
-    if (!resume || isSaving) {
-      return false;
-    }
-
-    if (debounceTimerRef.current !== null) {
-      window.clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
-
-    return persist(resume);
-  }, [isSaving, persist, resume]);
-
-  useEffect(() => {
-    if (!resume || !isDirty || isSaving) {
-      return undefined;
-    }
-
-    debounceTimerRef.current = window.setTimeout(() => {
-      void persist(resume);
-    }, 1500);
+    }, 2000);
 
     return () => {
-      if (debounceTimerRef.current !== null) {
-        window.clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
       }
     };
-  }, [isDirty, isSaving, persist, resume]);
-
-  return {
-    isSaving,
-    saveError,
-    forceSave,
-  };
+  }, [resume, isDirty, setDirty, setSaving, setSaveError]);
 }

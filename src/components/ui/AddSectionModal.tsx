@@ -174,7 +174,7 @@ export function AddSectionModal({ open, onOpenChange }: AddSectionModalProps) {
 
         <div className="mt-6 space-y-4">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 dark:text-zinc-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
             <Input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
@@ -204,32 +204,32 @@ export function AddSectionModal({ open, onOpenChange }: AddSectionModalProps) {
                         void handleSelect(option.type);
                       }}
                       className={cn(
-                        'group flex min-h-35 flex-col rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:focus-visible:ring-zinc-50',
+                        'group flex min-h-35 flex-col rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2',
                         isDisabled
-                          ? 'cursor-not-allowed border-dashed border-zinc-200 bg-zinc-50 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-600'
-                          : 'border-zinc-200 bg-white hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700',
+                          ? 'cursor-not-allowed border-dashed border-zinc-200 bg-zinc-50 text-zinc-400'
+                          : 'border-zinc-200 bg-white hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md',
                         isPending && 'pointer-events-none opacity-80'
                       )}
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-950">
                           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : option.icon}
                         </div>
-                        <span className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+                        <span className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">
                           {option.isRepeatable ? 'Repeatable' : 'Single'}
                         </span>
                       </div>
 
                       <div className="mt-4 flex-1 space-y-2">
-                        <h3 className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                        <h3 className="text-base font-semibold text-zinc-950">
                           {option.label}
                         </h3>
-                        <p className="text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                        <p className="text-sm leading-6 text-zinc-500">
                           {option.description}
                         </p>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                      <div className="mt-4 flex items-center justify-between text-xs font-medium text-zinc-400">
                         <span>{SECTION_TYPE_META[option.type].description}</span>
                         <span>{isDisabled ? 'Already added' : 'Add section'}</span>
                       </div>
@@ -240,7 +240,7 @@ export function AddSectionModal({ open, onOpenChange }: AddSectionModalProps) {
             </div>
 
             {filteredOptions.length === 0 ? (
-              <div className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400">
+              <div className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 text-sm text-zinc-500">
                 No sections match your search.
               </div>
             ) : null}

@@ -10,19 +10,20 @@ const renderSection = (section: ResumeSection) => {
       <h2 className="text-sm font-semibold uppercase tracking-wide">{section.title}</h2>
       <div className="space-y-4 text-sm leading-6">
         {section.items.map((item) => {
-          if (section.type === sectionTypes.experience && item.type === sectionTypes.experience) {
-            if (!hasText(item.data.company) && !hasText(item.data.position)) {
+          if (section.type === 'experience' && item.type === 'experience') {
+            const data = item.data;
+            if (!hasText(data.company) && !hasText(data.position)) {
               return null;
             }
 
             return (
               <article key={item.id} className="space-y-1">
-                {hasText(item.data.position) ? <h3 className="font-semibold">{item.data.position}</h3> : null}
-                {hasText(item.data.company) ? <p>{item.data.company}</p> : null}
-                {hasText(item.data.location) ? <p>{item.data.location}</p> : null}
-                {item.data.achievements.length > 0 ? (
+                {hasText(data.position) ? <h3 className="font-semibold">{data.position}</h3> : null}
+                {hasText(data.company) ? <p>{data.company}</p> : null}
+                {hasText(data.location) ? <p>{data.location}</p> : null}
+                {data.achievements?.length > 0 ? (
                   <ul className="space-y-1">
-                    {item.data.achievements.map((achievement, index) => (
+                    {data.achievements.map((achievement, index) => (
                       <li key={`${item.id}-${index}`}>{achievement}</li>
                     ))}
                   </ul>
@@ -31,19 +32,20 @@ const renderSection = (section: ResumeSection) => {
             );
           }
 
-          if (section.type === sectionTypes.education && item.type === sectionTypes.education) {
-            if (!hasText(item.data.institution) && !hasText(item.data.degree)) {
+          if (section.type === 'education' && item.type === 'education') {
+            const data = item.data;
+            if (!hasText(data.institution) && !hasText(data.degree)) {
               return null;
             }
 
             return (
               <article key={item.id} className="space-y-1">
-                {hasText(item.data.degree) ? <h3 className="font-semibold">{item.data.degree}</h3> : null}
-                {hasText(item.data.field) ? <p>{item.data.field}</p> : null}
-                {hasText(item.data.institution) ? <p>{item.data.institution}</p> : null}
-                {item.data.achievements.length > 0 ? (
+                {hasText(data.degree) ? <h3 className="font-semibold">{data.degree}</h3> : null}
+                {hasText(data.field) ? <p>{data.field}</p> : null}
+                {hasText(data.institution) ? <p>{data.institution}</p> : null}
+                {data.achievements?.length > 0 ? (
                   <ul className="space-y-1">
-                    {item.data.achievements.map((achievement, index) => (
+                    {data.achievements.map((achievement, index) => (
                       <li key={`${item.id}-${index}`}>{achievement}</li>
                     ))}
                   </ul>
@@ -52,68 +54,73 @@ const renderSection = (section: ResumeSection) => {
             );
           }
 
-          if (section.type === sectionTypes.skills && item.type === sectionTypes.skills) {
-            if (!hasText(item.data.name)) {
+          if (section.type === 'skills' && item.type === 'skills') {
+            const data = item.data;
+            if (!hasText(data.name)) {
               return null;
             }
 
             return (
               <article key={item.id} className="space-y-1">
-                <h3 className="font-semibold">{item.data.name}</h3>
-                {hasText(item.data.category) ? <p>{item.data.category}</p> : null}
+                <h3 className="font-semibold">{data.name}</h3>
+                {hasText(data.category) ? <p>{data.category}</p> : null}
               </article>
             );
           }
 
-          if (section.type === sectionTypes.projects && item.type === sectionTypes.projects) {
-            if (!hasText(item.data.name) && !hasText(item.data.description)) {
+          if (section.type === 'projects' && item.type === 'projects') {
+            const data = item.data;
+            if (!hasText(data.name) && !hasText(data.description)) {
               return null;
             }
 
             return (
               <article key={item.id} className="space-y-1">
-                {hasText(item.data.name) ? <h3 className="font-semibold">{item.data.name}</h3> : null}
-                {hasText(item.data.description) ? <p>{item.data.description}</p> : null}
-                {item.data.technologies.length > 0 ? <p>{item.data.technologies.join(' ')}</p> : null}
+                {hasText(data.name) ? <h3 className="font-semibold">{data.name}</h3> : null}
+                {hasText(data.description) ? <p>{data.description}</p> : null}
+                {data.technologies?.length > 0 ? <p>{data.technologies.join(' ')}</p> : null}
               </article>
             );
           }
 
-          if (section.type === sectionTypes.certifications && item.type === sectionTypes.certifications) {
-            if (!hasText(item.data.name) && !hasText(item.data.issuer)) {
+          if (section.type === 'certifications' && item.type === 'certifications') {
+            const data = item.data;
+            if (!hasText(data.name) && !hasText(data.issuer)) {
               return null;
             }
 
             return (
               <article key={item.id} className="space-y-1">
-                {hasText(item.data.name) ? <h3 className="font-semibold">{item.data.name}</h3> : null}
-                {hasText(item.data.issuer) ? <p>{item.data.issuer}</p> : null}
+                {hasText(data.name) ? <h3 className="font-semibold">{data.name}</h3> : null}
+                {hasText(data.issuer) ? <p>{data.issuer}</p> : null}
               </article>
             );
           }
 
-          if (section.type === sectionTypes.languages && item.type === sectionTypes.languages) {
-            if (!hasText(item.data.name)) {
+          if (section.type === 'languages' && item.type === 'languages') {
+            const data = item.data;
+            if (!hasText(data.name)) {
               return null;
             }
 
             return (
               <article key={item.id} className="space-y-1">
-                <h3 className="font-semibold">{item.data.name}</h3>
-                <p>{item.data.proficiency}</p>
+                <h3 className="font-semibold">{data.name}</h3>
+                <p>{data.proficiency}</p>
               </article>
             );
           }
 
-          if (section.type === sectionTypes.custom && item.type === sectionTypes.custom) {
-            if (!hasText(item.data.title) && !hasText(item.data.content)) {
+          if (section.type === 'custom' && item.type === 'custom') {
+            const data = item.data;
+            if (!hasText(data.title) && !hasText(data.content)) {
               return null;
             }
 
             return (
               <article key={item.id} className="space-y-1">
-                {hasText(item.data.title) ? <h3 className="font-semibold">{item.data.title}</h3> : null}
-                {hasText(item.data.content) ? <p>{item.data.content}</p> : null}
+                {hasText(data.title) ? <h3 className="font-semibold">{data.title}</h3> : null}
+                {hasText(data.content) ? <p>{data.content}</p> : null}
               </article>
             );
           }
@@ -127,27 +134,35 @@ const renderSection = (section: ResumeSection) => {
 
 export default function ClassicTemplate({ resume, isPreview, scale }: TemplateProps) {
   const sections = getVisibleSections(resume).filter(hasSectionContent);
-  const personalInfoSection = sections.find((section) => section.type === sectionTypes.personalInfo);
-  const contentSections = sections.filter((section) => section.type !== sectionTypes.personalInfo);
+  const isDemo = resume.id === 'demo-resume-id';
+  
+  const displaySections = isDemo ? resume.sections : sections;
+  const personalInfoSection = displaySections.find((section) => section.type === 'personal_info');
+  const contentSections = displaySections.filter((section) => section.type !== 'personal_info');
   const personalInfoItem = personalInfoSection?.items[0];
 
   return (
-    <div className={cn('w-full bg-white text-black', getScaleClass(scale), isPreview ? 'mx-auto' : '')}>
+    <div className={cn('w-full min-h-[1100px] bg-white text-black', getScaleClass(scale), isPreview ? 'mx-auto' : '')}>
       <div className="space-y-8 rounded-3xl border border-black px-8 py-10 font-serif">
-        {personalInfoItem && personalInfoItem.type === sectionTypes.personalInfo ? (
-          <header className="space-y-4 text-center">
-            {personalInfoItem.data.fullName ? <h1 className="text-4xl font-bold">{personalInfoItem.data.fullName}</h1> : null}
-            {personalInfoItem.data.jobTitle ? <p className="text-base">{personalInfoItem.data.jobTitle}</p> : null}
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-              {personalInfoItem.data.email ? <span>{personalInfoItem.data.email}</span> : null}
-              {personalInfoItem.data.phone ? <span>{personalInfoItem.data.phone}</span> : null}
-              {personalInfoItem.data.location ? <span>{personalInfoItem.data.location}</span> : null}
-              {personalInfoItem.data.website ? <span>{personalInfoItem.data.website}</span> : null}
-              {personalInfoItem.data.linkedin ? <span>{personalInfoItem.data.linkedin}</span> : null}
-              {personalInfoItem.data.github ? <span>{personalInfoItem.data.github}</span> : null}
-            </div>
-            {personalInfoItem.data.summary ? <p className="text-sm leading-7">{personalInfoItem.data.summary}</p> : null}
-          </header>
+        {personalInfoItem && personalInfoItem.type === 'personal_info' ? (
+          (() => {
+            const data = personalInfoItem.data;
+            return (
+              <header className="space-y-4 text-center">
+                {data.fullName ? <h1 className="text-4xl font-bold">{data.fullName}</h1> : null}
+                {data.jobTitle ? <p className="text-base">{data.jobTitle}</p> : null}
+                <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
+                  {data.email ? <span>{data.email}</span> : null}
+                  {data.phone ? <span>{data.phone}</span> : null}
+                  {data.location ? <span>{data.location}</span> : null}
+                  {data.website ? <span>{data.website}</span> : null}
+                  {data.linkedin ? <span>{data.linkedin}</span> : null}
+                  {data.github ? <span>{data.github}</span> : null}
+                </div>
+                {data.summary ? <p className="text-sm leading-7">{data.summary}</p> : null}
+              </header>
+            );
+          })()
         ) : null}
 
         <div className="space-y-8">

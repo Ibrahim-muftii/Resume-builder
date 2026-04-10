@@ -1,5 +1,6 @@
 'use client';
 
+import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -103,6 +104,10 @@ export default function ProjectsSection({ item, onSave, onCancel }: SectionFormP
 
       <div className="space-y-2">
         <Label htmlFor="technologies">Technologies</Label>
+        <Button type="button" variant="outline" size="sm" onClick={addTechnology} className="w-full gap-2">
+          <Plus className="h-4 w-4" />
+          Add Technology
+        </Button>
         <Input
           id="technologies"
           value={techInput}
@@ -117,14 +122,16 @@ export default function ProjectsSection({ item, onSave, onCancel }: SectionFormP
         />
         <div className="flex flex-wrap gap-2">
           {technologies.map((technology, index) => (
-            <button
-              key={`${technology}-${index}`}
-              type="button"
-              className="rounded-full border border-zinc-300 px-3 py-1 text-sm dark:border-zinc-700"
-              onClick={() => removeTechnology(index)}
-            >
-              {technology} ×
-            </button>
+            <div key={`${technology}-${index}`} className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-3 py-1 text-sm">
+              {technology}
+              <button
+                type="button"
+                onClick={() => removeTechnology(index)}
+                className="ml-1 text-zinc-500 hover:text-red-500"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
           ))}
         </div>
       </div>
@@ -166,14 +173,14 @@ export default function ProjectsSection({ item, onSave, onCancel }: SectionFormP
         </div>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+      <label className="flex items-center gap-2 text-sm text-zinc-700">
         <input type="checkbox" className="h-4 w-4" {...register('isCurrent')} />
         This project is ongoing
       </label>
 
-      <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
+      <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4">
+        <Button type="submit" disabled={isSubmitting} className="w-full bg-emerald-600 text-white hover:bg-emerald-700">{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
+        <Button type="button" variant="outline" onClick={onCancel} className="w-full">Cancel</Button>
       </div>
     </form>
   );

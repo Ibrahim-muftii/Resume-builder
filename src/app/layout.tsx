@@ -29,7 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${manrope.variable} ${spaceGrotesk.variable} min-h-screen bg-white font-sans text-slate-900 antialiased`}>
-        <ThemeProvider attribute="class" forcedTheme="light">
+        <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
           {children}
           <Toaster richColors position="top-right" />
         </ThemeProvider>

@@ -65,22 +65,23 @@ const renderSection = (section: ResumeSection) => {
 
       <div className="space-y-4">
         {section.items.map((item) => {
-          if (section.type === sectionTypes.experience && item.type === sectionTypes.experience) {
-            if (!hasText(item.data.company) && !hasText(item.data.position)) {
+          if (section.type === 'experience' && item.type === 'experience') {
+            const data = item.data;
+            if (!hasText(data.company) && !hasText(data.position)) {
               return null;
             }
 
             return (
               <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
                 <div className="space-y-1">
-                  {hasText(item.data.position) ? <h3 className="text-lg font-semibold text-slate-950">{item.data.position}</h3> : null}
-                  {hasText(item.data.company) ? <p className="font-medium text-teal-700">{item.data.company}</p> : null}
-                  {hasText(item.data.location) ? <p className="text-sm text-slate-500">{item.data.location}</p> : null}
+                  {hasText(data.position) ? <h3 className="text-lg font-semibold text-slate-950">{data.position}</h3> : null}
+                  {hasText(data.company) ? <p className="font-medium text-teal-700">{data.company}</p> : null}
+                  {hasText(data.location) ? <p className="text-sm text-slate-500">{data.location}</p> : null}
                 </div>
-                {hasText(item.data.description) ? <p className="mt-3 text-sm leading-6 text-slate-700">{item.data.description}</p> : null}
-                {item.data.achievements.length > 0 ? (
+                {hasText(data.description) ? <p className="mt-3 text-sm leading-6 text-slate-700">{data.description}</p> : null}
+                {data.achievements?.length > 0 ? (
                   <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                    {item.data.achievements.map((achievement, index) => (
+                    {data.achievements.map((achievement, index) => (
                       <li key={`${item.id}-${index}`}>• {achievement}</li>
                     ))}
                   </ul>
@@ -89,35 +90,37 @@ const renderSection = (section: ResumeSection) => {
             );
           }
 
-          if (section.type === sectionTypes.education && item.type === sectionTypes.education) {
-            if (!hasText(item.data.institution) && !hasText(item.data.degree)) {
+          if (section.type === 'education' && item.type === 'education') {
+            const data = item.data;
+            if (!hasText(data.institution) && !hasText(data.degree)) {
               return null;
             }
 
             return (
               <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
                 <div className="space-y-1">
-                  {hasText(item.data.degree) ? <h3 className="text-lg font-semibold text-slate-950">{item.data.degree}</h3> : null}
-                  {hasText(item.data.field) ? <p className="font-medium text-teal-700">{item.data.field}</p> : null}
-                  {hasText(item.data.institution) ? <p className="text-sm text-slate-700">{item.data.institution}</p> : null}
-                  {hasText(item.data.location) ? <p className="text-sm text-slate-500">{item.data.location}</p> : null}
+                  {hasText(data.degree) ? <h3 className="text-lg font-semibold text-slate-950">{data.degree}</h3> : null}
+                  {hasText(data.field) ? <p className="font-medium text-teal-700">{data.field}</p> : null}
+                  {hasText(data.institution) ? <p className="text-sm text-slate-700">{data.institution}</p> : null}
+                  {hasText(data.location) ? <p className="text-sm text-slate-500">{data.location}</p> : null}
                 </div>
               </article>
             );
           }
 
-          if (section.type === sectionTypes.projects && item.type === sectionTypes.projects) {
-            if (!hasText(item.data.name) && !hasText(item.data.description)) {
+          if (section.type === 'projects' && item.type === 'projects') {
+            const data = item.data;
+            if (!hasText(data.name) && !hasText(data.description)) {
               return null;
             }
 
             return (
               <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
-                {hasText(item.data.name) ? <h3 className="text-lg font-semibold text-slate-950">{item.data.name}</h3> : null}
-                {hasText(item.data.description) ? <p className="mt-2 text-sm leading-6 text-slate-700">{item.data.description}</p> : null}
-                {item.data.technologies.length > 0 ? (
+                {hasText(data.name) ? <h3 className="text-lg font-semibold text-slate-950">{data.name}</h3> : null}
+                {hasText(data.description) ? <p className="mt-2 text-sm leading-6 text-slate-700">{data.description}</p> : null}
+                {data.technologies?.length > 0 ? (
                   <div className="mt-3 flex flex-wrap gap-2 text-xs text-white">
-                    {item.data.technologies.map((technology) => (
+                    {data.technologies.map((technology) => (
                       <span key={`${item.id}-${technology}`} className="rounded-full bg-rose-500 px-3 py-1">
                         {technology}
                       </span>
@@ -128,26 +131,27 @@ const renderSection = (section: ResumeSection) => {
             );
           }
 
-          if (section.type === sectionTypes.skills && item.type === sectionTypes.skills) {
-            if (!hasText(item.data.name)) {
+          if (section.type === 'skills' && item.type === 'skills') {
+            const data = item.data;
+            if (!hasText(data.name)) {
               return null;
             }
 
             return (
               <article key={item.id} className="flex items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm">
                 <div>
-                  <h3 className="font-semibold text-slate-950">{item.data.name}</h3>
-                  {hasText(item.data.category) ? <p className="text-sm text-slate-500">{item.data.category}</p> : null}
+                  <h3 className="font-semibold text-slate-950">{data.name}</h3>
+                  {hasText(data.category) ? <p className="text-sm text-slate-500">{data.category}</p> : null}
                 </div>
                 <div className="h-2 w-24 rounded-full bg-teal-100">
                   <div
                     className={cn(
                       'h-2 rounded-full bg-rose-500',
-                      item.data.level === 'beginner'
+                      data.level === 'beginner'
                         ? 'w-1/4'
-                        : item.data.level === 'intermediate'
+                        : data.level === 'intermediate'
                           ? 'w-1/2'
-                          : item.data.level === 'advanced'
+                          : data.level === 'advanced'
                             ? 'w-3/4'
                             : 'w-full'
                     )}
@@ -157,41 +161,44 @@ const renderSection = (section: ResumeSection) => {
             );
           }
 
-          if (section.type === sectionTypes.certifications && item.type === sectionTypes.certifications) {
-            if (!hasText(item.data.name) && !hasText(item.data.issuer)) {
+          if (section.type === 'certifications' && item.type === 'certifications') {
+            const data = item.data;
+            if (!hasText(data.name) && !hasText(data.issuer)) {
               return null;
             }
 
             return (
               <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
-                {hasText(item.data.name) ? <h3 className="text-lg font-semibold text-slate-950">{item.data.name}</h3> : null}
-                {hasText(item.data.issuer) ? <p className="text-sm font-medium text-teal-700">{item.data.issuer}</p> : null}
+                {hasText(data.name) ? <h3 className="text-lg font-semibold text-slate-950">{data.name}</h3> : null}
+                {hasText(data.issuer) ? <p className="text-sm font-medium text-teal-700">{data.issuer}</p> : null}
               </article>
             );
           }
 
-          if (section.type === sectionTypes.languages && item.type === sectionTypes.languages) {
-            if (!hasText(item.data.name)) {
+          if (section.type === 'languages' && item.type === 'languages') {
+            const data = item.data;
+            if (!hasText(data.name)) {
               return null;
             }
 
             return (
               <article key={item.id} className="flex items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm">
-                <h3 className="font-semibold text-slate-950">{item.data.name}</h3>
-                <span className="text-sm text-slate-500">{item.data.proficiency}</span>
+                <h3 className="font-semibold text-slate-950">{data.name}</h3>
+                <span className="text-sm text-slate-500">{data.proficiency}</span>
               </article>
             );
           }
 
-          if (section.type === sectionTypes.custom && item.type === sectionTypes.custom) {
-            if (!hasText(item.data.title) && !hasText(item.data.content)) {
+          if (section.type === 'custom' && item.type === 'custom') {
+            const data = item.data;
+            if (!hasText(data.title) && !hasText(data.content)) {
               return null;
             }
 
             return (
               <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
-                {hasText(item.data.title) ? <h3 className="text-lg font-semibold text-slate-950">{item.data.title}</h3> : null}
-                {hasText(item.data.content) ? <p className="mt-2 text-sm leading-6 text-slate-700">{item.data.content}</p> : null}
+                {hasText(data.title) ? <h3 className="text-lg font-semibold text-slate-950">{data.title}</h3> : null}
+                {hasText(data.content) ? <p className="mt-2 text-sm leading-6 text-slate-700">{data.content}</p> : null}
               </article>
             );
           }
@@ -205,41 +212,49 @@ const renderSection = (section: ResumeSection) => {
 
 export default function CreativeTemplate({ resume, isPreview, scale }: TemplateProps) {
   const sections = getVisibleSections(resume).filter(hasSectionContent);
-  const personalInfoSection = sections.find((section) => section.type === sectionTypes.personalInfo);
+  const isDemo = resume.id === 'demo-resume-id';
+  
+  const displaySections = isDemo ? resume.sections : sections;
+  const personalInfoSection = displaySections.find((section) => section.type === 'personal_info');
   const personalInfoItem = personalInfoSection?.items[0];
-  const leftSections = sections.filter((section) =>
-    [sectionTypes.skills, sectionTypes.languages, sectionTypes.certifications].includes(section.type)
+  const leftSections = displaySections.filter((section) =>
+    ['skills', 'languages', 'certifications'].includes(section.type)
   );
-  const rightSections = sections.filter((section) =>
-    [sectionTypes.experience, sectionTypes.education, sectionTypes.projects, sectionTypes.custom].includes(section.type)
+  const rightSections = displaySections.filter((section) =>
+    ['experience', 'education', 'projects', 'custom'].includes(section.type)
   );
 
   return (
-    <div className={cn('w-full bg-zinc-50 text-slate-950', getScaleClass(scale), isPreview ? 'mx-auto' : '')}>
+    <div className={cn('w-full min-h-[1100px] bg-zinc-50 text-slate-950', getScaleClass(scale), isPreview ? 'mx-auto' : '')}>
       <div className="overflow-hidden rounded-3xl shadow-2xl">
-        <header className="bg-teal-600 px-8 py-10 text-white">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-2">
-              {personalInfoItem && personalInfoItem.type === sectionTypes.personalInfo && personalInfoItem.data.fullName ? (
-                <h1 className="text-4xl font-black tracking-tight">{personalInfoItem.data.fullName}</h1>
-              ) : null}
-              {personalInfoItem && personalInfoItem.type === sectionTypes.personalInfo && personalInfoItem.data.jobTitle ? (
-                <p className="text-lg font-medium text-teal-50">{personalInfoItem.data.jobTitle}</p>
-              ) : null}
-            </div>
+        {personalInfoItem && personalInfoItem.type === 'personal_info' ? (
+          (() => {
+            const data = personalInfoItem.data;
+            return (
+              <header className="bg-teal-600 px-8 py-10 text-white">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="space-y-2">
+                    {data.fullName ? (
+                      <h1 className="text-4xl font-black tracking-tight">{data.fullName}</h1>
+                    ) : null}
+                    {data.jobTitle ? (
+                      <p className="text-lg font-medium text-teal-50">{data.jobTitle}</p>
+                    ) : null}
+                  </div>
 
-            {personalInfoItem && personalInfoItem.type === sectionTypes.personalInfo ? (
-              <div className="grid gap-3 text-sm text-teal-50 sm:grid-cols-2 xl:grid-cols-3">
-                {personalInfoItem.data.email ? renderInfoLine(Mail, personalInfoItem.data.email) : null}
-                {personalInfoItem.data.phone ? renderInfoLine(Phone, personalInfoItem.data.phone) : null}
-                {personalInfoItem.data.location ? renderInfoLine(MapPin, personalInfoItem.data.location) : null}
-                {personalInfoItem.data.website ? renderInfoLine(Globe, personalInfoItem.data.website) : null}
-                {personalInfoItem.data.linkedin ? renderInfoLine(Linkedin, personalInfoItem.data.linkedin) : null}
-                {personalInfoItem.data.github ? renderInfoLine(Github, personalInfoItem.data.github) : null}
-              </div>
-            ) : null}
-          </div>
-        </header>
+                  <div className="grid gap-3 text-sm text-teal-50 sm:grid-cols-2 xl:grid-cols-3">
+                    {data.email ? renderInfoLine(Mail, data.email) : null}
+                    {data.phone ? renderInfoLine(Phone, data.phone) : null}
+                    {data.location ? renderInfoLine(MapPin, data.location) : null}
+                    {data.website ? renderInfoLine(Globe, data.website) : null}
+                    {data.linkedin ? renderInfoLine(Linkedin, data.linkedin) : null}
+                    {data.github ? renderInfoLine(Github, data.github) : null}
+                  </div>
+                </div>
+              </header>
+            );
+          })()
+        ) : null}
 
         <div className="grid grid-cols-1 gap-0 bg-white lg:grid-cols-[35%_65%]">
           <aside className="space-y-8 bg-teal-50 px-8 py-10">

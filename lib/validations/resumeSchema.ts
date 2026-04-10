@@ -24,13 +24,14 @@ const urlOrEmptyStringSchema = z.union([
 const optionalUrlSchema = z.union([urlOrEmptyStringSchema, z.undefined()]);
 
 const nullableDateStringSchema = z.union([
-  z.string().refine(isValidDateString, 'Must be a valid date string'),
+  z.string().refine((val) => val === '' || isValidDateString(val), 'Must be a valid date string'),
   z.null(),
-]);
+]).default('');
 
-const requiredDateStringSchema = z
-  .string()
-  .refine(isValidDateString, 'Must be a valid date string');
+const requiredDateStringSchema = z.union([
+  z.string().refine((val) => val === '' || isValidDateString(val), 'Must be a valid date string'),
+  z.null(),
+]).default('');
 
 export const personalInfoSchema = z.object({
   type: z.literal('personal_info'),
@@ -56,27 +57,27 @@ export const personalInfoSchema = z.object({
 
 export const experienceSchema = z.object({
   type: z.literal('experience'),
-  company: nonEmptyStringSchema,
-  position: nonEmptyStringSchema,
-  location: nonEmptyStringSchema,
+  company: draftStringSchema,
+  position: draftStringSchema,
+  location: draftStringSchema,
   startDate: nullableDateStringSchema,
   endDate: nullableDateStringSchema,
   isCurrent: z.boolean(),
-  description: nonEmptyStringSchema,
-  achievements: z.array(nonEmptyStringSchema),
+  description: draftStringSchema,
+  achievements: z.array(z.string().trim()),
 });
 
 export const educationSchema = z.object({
   type: z.literal('education'),
-  institution: nonEmptyStringSchema,
-  degree: nonEmptyStringSchema,
-  field: nonEmptyStringSchema,
-  location: nonEmptyStringSchema,
+  institution: draftStringSchema,
+  degree: draftStringSchema,
+  field: draftStringSchema,
+  location: draftStringSchema,
   startDate: nullableDateStringSchema,
   endDate: nullableDateStringSchema,
   isCurrent: z.boolean(),
   gpa: z.union([z.string(), z.undefined()]),
-  achievements: z.array(nonEmptyStringSchema),
+  achievements: z.array(z.string().trim()),
 });
 
 export const skillLevelSchema = z.enum([
@@ -88,15 +89,15 @@ export const skillLevelSchema = z.enum([
 
 export const skillSchema = z.object({
   type: z.literal('skills'),
-  name: nonEmptyStringSchema,
+  name: draftStringSchema,
   level: skillLevelSchema,
-  category: nonEmptyStringSchema,
+  category: draftStringSchema,
 });
 
 export const projectSchema = z.object({
   type: z.literal('projects'),
-  name: nonEmptyStringSchema,
-  description: nonEmptyStringSchema,
+  name: draftStringSchema,
+  description: draftStringSchema,
   technologies: z.array(z.string()),
   url: optionalUrlSchema,
   githubUrl: optionalUrlSchema,
@@ -107,10 +108,10 @@ export const projectSchema = z.object({
 
 export const certificationSchema = z.object({
   type: z.literal('certifications'),
-  name: nonEmptyStringSchema,
-  issuer: nonEmptyStringSchema,
-  issueDate: requiredDateStringSchema,
-  expiryDate: requiredDateStringSchema,
+  name: draftStringSchema,
+  issuer: draftStringSchema,
+  issueDate: z.union([requiredDateStringSchema, z.literal(''), z.null()]),
+  expiryDate: z.union([requiredDateStringSchema, z.literal(''), z.null()]),
   credentialId: z.union([z.string(), z.undefined()]),
   url: optionalUrlSchema,
 });
@@ -125,14 +126,14 @@ export const languageProficiencySchema = z.enum([
 
 export const languageSchema = z.object({
   type: z.literal('languages'),
-  name: nonEmptyStringSchema,
+  name: draftStringSchema,
   proficiency: languageProficiencySchema,
 });
 
 export const customSchema = z.object({
   type: z.literal('custom'),
-  title: nonEmptyStringSchema,
-  content: nonEmptyStringSchema,
+  title: draftStringSchema,
+  content: draftStringSchema,
 });
 
 export const sectionItemDataSchema = z.discriminatedUnion('type', [
@@ -162,8 +163,8 @@ const sectionItemSchema = z.object({
     'custom',
   ]),
   data: sectionItemDataSchema,
-  createdAt: nonEmptyStringSchema,
-  updatedAt: nonEmptyStringSchema,
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 const resumeSectionSchema = z.object({
@@ -183,8 +184,8 @@ const resumeSectionSchema = z.object({
   isVisible: z.boolean(),
   sortOrder: z.number().int().nonnegative(),
   items: z.array(sectionItemSchema),
-  createdAt: nonEmptyStringSchema,
-  updatedAt: nonEmptyStringSchema,
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 export const resumeSchema = z.object({
@@ -197,10 +198,11 @@ export const resumeSchema = z.object({
     'minimal',
     'creative',
     'executive',
+    'professional',
   ]),
   sections: z.array(resumeSectionSchema),
-  createdAt: nonEmptyStringSchema,
-  updatedAt: nonEmptyStringSchema,
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 export type PersonalInfoSchemaType = z.infer<typeof personalInfoSchema>;

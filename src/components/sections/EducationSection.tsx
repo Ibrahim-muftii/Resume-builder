@@ -1,5 +1,6 @@
 'use client';
 
+import { Plus, Trash2 } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -73,91 +74,92 @@ export default function EducationSection({ item, onSave, onCancel }: SectionForm
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(submit)}>
+    <form className="space-y-5" onSubmit={handleSubmit(submit)}>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="institution">Institution</Label>
-          <Input id="institution" {...register('institution')} />
-          {errors.institution ? <p className="text-sm text-red-500">{errors.institution.message}</p> : null}
+          <Label htmlFor="institution" className="font-semibold text-zinc-800">Institution</Label>
+          <Input id="institution" placeholder="University Name" {...register('institution')} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
+          {errors.institution ? <p className="text-xs font-medium text-red-500">{errors.institution.message}</p> : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="degree">Degree</Label>
-          <Input id="degree" {...register('degree')} />
-          {errors.degree ? <p className="text-sm text-red-500">{errors.degree.message}</p> : null}
+          <Label htmlFor="degree" className="font-semibold text-zinc-800">Degree</Label>
+          <Input id="degree" placeholder="Bachelor of Science" {...register('degree')} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
+          {errors.degree ? <p className="text-xs font-medium text-red-500">{errors.degree.message}</p> : null}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="field">Field</Label>
-          <Input id="field" {...register('field')} />
-          {errors.field ? <p className="text-sm text-red-500">{errors.field.message}</p> : null}
+          <Label htmlFor="field" className="font-semibold text-zinc-800">Field of Study</Label>
+          <Input id="field" placeholder="Computer Science" {...register('field')} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
+          {errors.field ? <p className="text-xs font-medium text-red-500">{errors.field.message}</p> : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
-          <Input id="location" {...register('location')} />
-          {errors.location ? <p className="text-sm text-red-500">{errors.location.message}</p> : null}
+          <Label htmlFor="location" className="font-semibold text-zinc-800">Location</Label>
+          <Input id="location" placeholder="San Francisco, CA" {...register('location')} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
+          {errors.location ? <p className="text-xs font-medium text-red-500">{errors.location.message}</p> : null}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="startDate">Start Date</Label>
+          <Label htmlFor="startDate" className="font-semibold text-zinc-900">Start Date</Label>
           <Input
             id="startDate"
             type="date"
             value={watch('startDate') ?? ''}
             onChange={(event) => setValue('startDate', event.target.value || null, { shouldValidate: true })}
+            className="border-zinc-200 bg-zinc-50 focus:bg-white"
           />
-          {errors.startDate ? <p className="text-sm text-red-500">{errors.startDate.message}</p> : null}
+          {errors.startDate ? <p className="text-xs font-medium text-red-500">{errors.startDate.message}</p> : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="endDate">End Date</Label>
+          <Label htmlFor="endDate" className="font-semibold text-zinc-900">End Date</Label>
           <Input
             id="endDate"
             type="date"
             disabled={isCurrent}
             value={watch('endDate') ?? ''}
             onChange={(event) => setValue('endDate', event.target.value || null, { shouldValidate: true })}
+            className="border-zinc-200 bg-zinc-50 focus:bg-white disabled:bg-zinc-100"
           />
-          {errors.endDate ? <p className="text-sm text-red-500">{errors.endDate.message}</p> : null}
+          {errors.endDate ? <p className="text-xs font-medium text-red-500">{errors.endDate.message}</p> : null}
         </div>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-        <input type="checkbox" className="h-4 w-4" {...register('isCurrent')} />
+      <label className="flex items-center gap-2 text-sm font-medium text-zinc-700">
+        <input type="checkbox" className="h-4 w-4 rounded border-zinc-300" {...register('isCurrent')} />
         I currently study here
       </label>
 
       <div className="space-y-2">
-        <Label htmlFor="gpa">GPA (optional)</Label>
-        <Input id="gpa" {...register('gpa')} />
-        {errors.gpa ? <p className="text-sm text-red-500">{errors.gpa.message}</p> : null}
+        <Label htmlFor="gpa" className="font-semibold text-zinc-800">GPA <span className="font-normal text-zinc-500">(optional)</span></Label>
+        <Input id="gpa" placeholder="3.8" {...register('gpa')} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
+        {errors.gpa ? <p className="text-xs font-medium text-red-500">{errors.gpa.message}</p> : null}
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label>Achievements</Label>
-          <Button type="button" variant="outline" onClick={() => append('')}>
-            + Add
-          </Button>
-        </div>
+        <Label className="font-semibold text-zinc-800">Achievements</Label>
+        <Button type="button" variant="outline" size="sm" onClick={() => append('')} className="w-full gap-2">
+          <Plus className="h-4 w-4" />
+          Add Achievement
+        </Button>
         <div className="space-y-2">
           {fields.map((field, index) => (
             <div key={field.id} className="flex items-center gap-2">
-              <Input {...register(`achievements.${index}`)} />
-              <Button type="button" variant="outline" onClick={() => remove(index)}>
-                Remove
+              <Input placeholder="Key achievement..." {...register(`achievements.${index}`)} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
+              <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)} className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50">
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           ))}
         </div>
-        {errors.achievements ? <p className="text-sm text-red-500">{errors.achievements.message as string}</p> : null}
+        {errors.achievements ? <p className="text-xs font-medium text-red-500">{errors.achievements.message as string}</p> : null}
       </div>
 
-      <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
+      <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4">
+        <Button type="submit" disabled={isSubmitting} className="w-full bg-emerald-600 text-white hover:bg-emerald-700">{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
+        <Button type="button" variant="outline" onClick={onCancel} className="w-full">Cancel</Button>
       </div>
     </form>
   );

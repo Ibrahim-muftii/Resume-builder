@@ -96,7 +96,7 @@ export default function BuilderCanvas() {
 
         <DragOverlay>
           {draggedSection ? (
-            <div className="rounded-xl border border-indigo-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 shadow-lg">
+            <div className="rounded-xl border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 shadow-lg">
               {draggedSection.title}
             </div>
           ) : null}

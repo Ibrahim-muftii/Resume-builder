@@ -70,15 +70,15 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <Card className="border-zinc-200 bg-white/95 shadow-lg backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+      <Card className="border-zinc-200 bg-white/95 shadow-lg backdrop-blur">
         <CardContent className="pt-6">
           <div className="space-y-6 text-center">
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
               Your password has been updated successfully.
             </div>
             <Link
               href="/dashboard"
-              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
             >
               Go to dashboard
             </Link>
@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <Card className="border-zinc-200 bg-white/95 shadow-lg backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+    <Card className="border-zinc-200 bg-white/95 shadow-lg backdrop-blur">
       <CardHeader className="space-y-2 text-center">
         <CardTitle>Set a new password</CardTitle>
         <CardDescription>Choose a secure password for your account.</CardDescription>

@@ -3,9 +3,9 @@
 import { toast, type ToastT } from 'sonner';
 
 const toastClassName =
-  'border border-zinc-200 bg-white text-zinc-950 shadow-lg dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50';
+  'border border-zinc-200 bg-white text-zinc-950 shadow-lg';
 
-const descriptionClassName = 'text-zinc-500 dark:text-zinc-400';
+const descriptionClassName = 'text-zinc-500';
 
 type ToastOptions = Parameters<typeof toast.success>[1];
 
