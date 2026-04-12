@@ -15,6 +15,7 @@ type ResumeRow = {
   user_id: string;
   title: string;
   template_id: TemplateId;
+  settings: any;
   created_at: string;
   updated_at: string;
 };
@@ -24,7 +25,8 @@ type ResumeSectionRow = {
   resume_id: string;
   type: SectionType;
   title: string;
-  position: number;
+  sort_order?: number;
+  position?: number;
   is_visible: boolean;
   created_at: string;
   updated_at: string;
@@ -33,7 +35,8 @@ type ResumeSectionRow = {
 type SectionItemRow = {
   id: string;
   section_id: string;
-  position: number;
+  sort_order?: number;
+  position?: number;
   data: SectionItemData;
   created_at: string;
   updated_at: string;
@@ -50,21 +53,29 @@ const mapResume = (resumeRow: ResumeRow, sections: ResumeSectionRow[], items: Se
 
   const mappedSections = sections.map((section) => {
     const sectionItems = itemsBySectionId.get(section.id) ?? [];
+    
+    const isKeyAchievements = section.type === 'custom' && (
+      section.title === 'Key Achievements' || 
+      sectionItems.some(item => (item.data as any)?.type === 'key_achievements')
+    );
+    
+    const effectiveType = isKeyAchievements ? 'key_achievements' : section.type;
 
     const mappedItems = sectionItems.map((item) => {
-      const parsedData = sectionItemDataSchema.safeParse(item.data);
-      const itemData =
-        parsedData.success && parsedData.data.type === section.type
-          ? parsedData.data
-          : getDefaultSectionItem(section.type);
+      const dataToParse = {
+        ...(item.data as any),
+        type: effectiveType
+      };
+      const parsedData = sectionItemDataSchema.safeParse(dataToParse);
+      const itemData = parsedData.success ? parsedData.data : getDefaultSectionItem(effectiveType);
 
       return {
         id: item.id,
         sectionId: item.section_id,
         resumeId: section.resume_id,
-        sortOrder: item.position,
-        type: section.type,
-        data: itemData as Extract<SectionItemData, { type: typeof section.type }>,
+        sortOrder: item.sort_order ?? item.position ?? 0,
+        type: effectiveType,
+        data: itemData as Extract<SectionItemData, { type: SectionType }>,
         createdAt: item.created_at,
         updatedAt: item.updated_at,
       } as SectionItem;
@@ -73,21 +84,36 @@ const mapResume = (resumeRow: ResumeRow, sections: ResumeSectionRow[], items: Se
     return {
       id: section.id,
       resumeId: section.resume_id,
-      type: section.type,
+      type: effectiveType,
       title: section.title,
       isVisible: section.is_visible,
-      sortOrder: section.position,
+      sortOrder: section.sort_order ?? section.position ?? 0,
       createdAt: section.created_at,
       updatedAt: section.updated_at,
       items: mappedItems as ResumeSection['items'],
     } as ResumeSection;
   });
 
+  let settings = resumeRow.settings;
+  if (typeof settings === 'string') {
+    try {
+      settings = JSON.parse(settings);
+    } catch (e) {
+      settings = null;
+    }
+  }
+
   return {
     id: resumeRow.id,
     userId: resumeRow.user_id,
     title: resumeRow.title,
     templateId: resumeRow.template_id,
+    settings: (settings && typeof settings === 'object') ? settings : {
+      fontSize: 'medium',
+      fontFamily: 'Inter',
+      primaryColor: '#000000',
+      backgroundColor: '#ffffff',
+    },
     sections: mappedSections,
     createdAt: resumeRow.created_at,
     updatedAt: resumeRow.updated_at,
@@ -95,55 +121,74 @@ const mapResume = (resumeRow: ResumeRow, sections: ResumeSectionRow[], items: Se
 };
 
 const fetchResumeById = async (id: string): Promise<Resume | null> => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
+    if (!user) {
+      console.error('FetchResume: No authenticated user.');
+      return null;
+    }
+
+    const { data: resumeRow, error: resumeError } = await supabase
+      .from('resumes')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (resumeError || !resumeRow) {
+      console.error('FetchResume: Resume not found or error:', resumeError);
+      return null;
+    }
+
+    // Attempt to fetch sections - Try both legacy and new column names
+    let sectionsResult = await supabase
+      .from('resume_sections')
+      .select('*')
+      .eq('resume_id', id)
+      .order('sort_order', { ascending: true });
+
+    if (sectionsResult.error) {
+       console.warn('Sort order failed, trying position...');
+       sectionsResult = await supabase
+        .from('resume_sections')
+        .select('*')
+        .eq('resume_id', id)
+        .order('position', { ascending: true });
+    }
+
+    if (sectionsResult.error) {
+      console.error('FetchResume: Sections error:', sectionsResult.error);
+      return null;
+    }
+
+    const sectionRows = sectionsResult.data as ResumeSectionRow[];
+    const sectionIds = sectionRows.map((section) => section.id);
+
+    if (sectionIds.length === 0) {
+      return mapResume(resumeRow as ResumeRow, sectionRows, []);
+    }
+
+    let itemsResult = await supabase
+      .from('section_items')
+      .select('*')
+      .in('section_id', sectionIds)
+      .order('sort_order', { ascending: true });
+
+    if (itemsResult.error) {
+       itemsResult = await supabase
+        .from('section_items')
+        .select('*')
+        .in('section_id', sectionIds)
+        .order('position', { ascending: true });
+    }
+
+    return mapResume(resumeRow as ResumeRow, sectionRows, (itemsResult.data ?? []) as SectionItemRow[]);
+  } catch (err) {
+    console.error('Critical Fetch Error:', err);
     return null;
   }
-
-  const { data: resumeRow, error: resumeError } = await supabase
-    .from('resumes')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (resumeError || !resumeRow) {
-    return null;
-  }
-
-  const { data: sections, error: sectionsError } = await supabase
-    .from('resume_sections')
-    .select('*')
-    .eq('resume_id', id)
-    .order('position', { ascending: true });
-
-  if (sectionsError) {
-    return null;
-  }
-
-  const sectionRows = (sections ?? []) as ResumeSectionRow[];
-  const sectionIds = sectionRows.map((section) => section.id);
-
-  if (sectionIds.length === 0) {
-    return mapResume(resumeRow as ResumeRow, sectionRows, []);
-  }
-
-  const { data: items, error: itemsError } = await supabase
-    .from('section_items')
-    .select('*')
-    .in('section_id', sectionIds)
-    .order('section_id', { ascending: true })
-    .order('position', { ascending: true });
-
-  if (itemsError) {
-    return null;
-  }
-
-  return mapResume(resumeRow as ResumeRow, sectionRows, (items ?? []) as SectionItemRow[]);
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

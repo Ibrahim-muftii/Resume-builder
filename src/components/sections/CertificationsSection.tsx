@@ -19,35 +19,35 @@ export default function CertificationsSection({ item, onSave, onCancel }: Sectio
   const defaults: CertificationSchemaType =
     item.type === 'certifications'
       ? {
-          type: 'certifications',
-          name: item.data.name,
-          issuer: item.data.issuer,
-          issueDate: item.data.issueDate,
-          expiryDate: item.data.expiryDate,
-          credentialId: item.data.credentialId ?? '',
-          url: item.data.url ?? '',
-        }
+        type: 'certifications',
+        name: item.data.name,
+        issuer: item.data.issuer,
+        issueDate: item.data.issueDate,
+        expiryDate: item.data.expiryDate,
+        credentialId: item.data.credentialId ?? '',
+        url: item.data.url ?? '',
+      }
       : {
-          type: 'certifications',
-          name: '',
-          issuer: '',
-          issueDate: '',
-          expiryDate: '',
-          credentialId: '',
-          url: '',
-        };
+        type: 'certifications',
+        name: '',
+        issuer: '',
+        issueDate: '',
+        expiryDate: '',
+        credentialId: '',
+        url: '',
+      };
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<CertificationSchemaType>({
-    resolver: zodResolver(certificationSchema),
-    defaultValues: defaults,
+    resolver: zodResolver(certificationSchema) as any,
+    defaultValues: defaults as any,
   });
 
   const submit = async (data: CertificationSchemaType): Promise<void> => {
-    await Promise.resolve(onSave(data));
+    await Promise.resolve(onSave(data as any));
   };
 
   return (

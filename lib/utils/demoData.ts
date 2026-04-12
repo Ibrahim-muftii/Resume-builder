@@ -25,8 +25,10 @@ const getDemoItemData = (type: SectionType): any => {
         startDate: '2020-01-01',
         endDate: '',
         isCurrent: true,
-        description: 'Leading the design direction for the core platform, managing a cross-functional team of designers and researchers.',
-        achievements: [
+        descriptionTitle: 'Key Responsibilities',
+        descriptionBullets: [
+          'Leading the design direction for the core platform, managing a cross-functional team of designers and researchers.',
+          'Defining product strategy and design roadmaps aligned with business objectives.',
           'Redesigned the onboarding flow, leading to a 40% increase in user activation.',
           'Developed and launched a unified design system that reduced front-end development time by 30%.',
         ],
@@ -41,7 +43,6 @@ const getDemoItemData = (type: SectionType): any => {
         startDate: '2012-09-01',
         endDate: '2016-06-01',
         isCurrent: false,
-        achievements: ["President's Award for Academic Excellence"],
       };
     case 'skills':
       return {
@@ -54,11 +55,11 @@ const getDemoItemData = (type: SectionType): any => {
       return {
         type,
         name: 'EcoTrack Platform',
-        description: 'A comprehensive sustainability dashboard for enterprises to track and reduce carbon emissions.',
-        technologies: ['React', 'D3.js'],
-        startDate: '2022-05-01',
-        endDate: '2022-12-01',
-        isCurrent: false,
+        descriptionTitle: 'A comprehensive sustainability dashboard for enterprises to track and reduce carbon emissions.',
+        descriptionBullets: [
+          'Built interactive data visualizations using React and D3.js.',
+          'Designed and implemented real-time emissions tracking pipeline.',
+        ],
       };
     default:
       return {};

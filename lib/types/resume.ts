@@ -14,6 +14,7 @@ export type SectionType =
   | 'projects'
   | 'certifications'
   | 'languages'
+  | 'key_achievements'
   | 'custom';
 
 export type PersonalInfoData = {
@@ -38,8 +39,8 @@ export type ExperienceData = {
   startDate: string;
   endDate: string;
   isCurrent: boolean;
-  description: string;
-  achievements: string[];
+  descriptionTitle: string;
+  descriptionBullets: string[];
 };
 
 export type EducationData = {
@@ -52,7 +53,6 @@ export type EducationData = {
   endDate: string;
   isCurrent: boolean;
   gpa?: string;
-  achievements: string[];
 };
 
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
@@ -67,13 +67,10 @@ export type SkillData = {
 export type ProjectData = {
   type: 'projects';
   name: string;
-  description: string;
-  technologies: string[];
+  descriptionTitle: string;
+  descriptionBullets: string[];
   url?: string;
   githubUrl?: string;
-  startDate: string;
-  endDate: string;
-  isCurrent: boolean;
 };
 
 export type CertificationData = {
@@ -105,6 +102,19 @@ export type CustomData = {
   content: string;
 };
 
+export type KeyAchievementData = {
+  type: 'key_achievements';
+  title: string;
+  description: string;
+};
+
+export type ResumeSettings = {
+  fontSize: 'small' | 'medium' | 'large';
+  fontFamily: string;
+  primaryColor: string;
+  backgroundColor: string;
+};
+
 export type SectionItemData =
   | PersonalInfoData
   | ExperienceData
@@ -113,6 +123,7 @@ export type SectionItemData =
   | ProjectData
   | CertificationData
   | LanguageData
+  | KeyAchievementData
   | CustomData;
 
 type SectionItemByType<T extends SectionType> = {
@@ -151,6 +162,7 @@ export type Resume = {
   userId: string;
   title: string;
   templateId: TemplateId;
+  settings: ResumeSettings;
   sections: ResumeSection[];
   createdAt: string;
   updatedAt: string;

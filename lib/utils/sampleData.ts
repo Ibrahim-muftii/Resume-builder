@@ -22,10 +22,12 @@ export const SAMPLE_DATA: Record<ResumeTypes.SectionType, ResumeTypes.SectionIte
     startDate: '2020-01',
     endDate: '',
     isCurrent: true,
-    description: 'Leading the frontend team in developing a modern SaaS platform using Next.js and Tailwind CSS.',
-    achievements: [
+    descriptionTitle: 'Key Responsibilities',
+    descriptionBullets: [
+      'Leading the frontend team in developing a modern SaaS platform using Next.js and Tailwind CSS.',
+      'Architecting scalable component systems and design tokens for cross-team consistency.',
+      'Conducting code reviews and establishing best practices for React development.',
       'Improved application performance by 40% through code splitting and lazy loading.',
-      'Mentored 5 junior developers and established best practices for React development.',
       'Integrated Supabase for real-time data synchronization and authentication.',
     ],
   },
@@ -39,10 +41,6 @@ export const SAMPLE_DATA: Record<ResumeTypes.SectionType, ResumeTypes.SectionIte
     endDate: '2016-05',
     isCurrent: false,
     gpa: '3.8/4.0',
-    achievements: [
-      "Dean's List for 4 consecutive years.",
-      'Won the annual Hackathon with a project on distributed systems.',
-    ],
   },
   skills: {
     type: 'skills',
@@ -53,13 +51,14 @@ export const SAMPLE_DATA: Record<ResumeTypes.SectionType, ResumeTypes.SectionIte
   projects: {
     type: 'projects',
     name: 'Open Source UI Library',
-    description: 'A comprehensive collection of accessible and reusable components for React.',
-    technologies: ['React', 'TypeScript', 'Storybook'],
+    descriptionTitle: 'A comprehensive collection of accessible and reusable components for React.',
+    descriptionBullets: [
+      'Built with React, TypeScript, and Storybook for component documentation.',
+      'Implemented accessible design patterns following WAI-ARIA guidelines.',
+      'Published to npm with automated CI/CD pipeline.',
+    ],
     url: 'https://ui-lib.example.com',
     githubUrl: 'https://github.com/jdoe/ui-lib',
-    startDate: '2021-06',
-    endDate: '',
-    isCurrent: true,
   },
   certifications: {
     type: 'certifications',

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type MobilePanel = 'sections' | 'canvas' | 'editor';
+type MobilePanel = 'sections' | 'canvas' | 'editor' | 'design';
 
 type UiStoreState = {
   isTemplateSelectorOpen: boolean;

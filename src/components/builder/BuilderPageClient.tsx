@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import SectionToolbar from './SectionToolbar';
 import BuilderCanvas from './BuilderCanvas';
 import FieldEditor from './FieldEditor';
+import DesignSettings from './DesignSettings';
 import TemplateSelector from '@/components/templates/TemplateSelector';
 import { AddSectionModal } from '../ui/AddSectionModal';
 
@@ -29,6 +30,7 @@ type BuilderPageClientProps = {
 
 const panelTabOptions = [
   { id: 'sections', label: 'Sections' },
+  { id: 'design', label: 'Design' },
   { id: 'canvas', label: 'Preview' },
   { id: 'editor', label: 'Editor' },
 ] as const;
@@ -40,6 +42,7 @@ export default function BuilderPageClient({ initialResume }: BuilderPageClientPr
   const isDirty = useResumeStore((state) => state.isDirty);
   const isSaving = useResumeStore((state) => state.isSaving);
   const saveError = useResumeStore((state) => state.saveError);
+  const activeSectionId = useResumeStore((state) => state.activeSection);
   const undo = useResumeStore((state) => state.undo);
 
   const panelTab = useUiStore((state) => state.isMobilePanel);
@@ -228,9 +231,9 @@ export default function BuilderPageClient({ initialResume }: BuilderPageClientPr
             <BuilderCanvas />
           </div>
 
-          {/* Right: Field Editor (Sidepanel) */}
+          {/* Right: FieldEditor / DesignSettings (Sidepanel) */}
           <div className="w-[40%] shrink-0 overflow-y-auto hidden lg:block px-2">
-            <FieldEditor />
+            {activeSectionId === 'design' ? <DesignSettings /> : <FieldEditor />}
           </div>
         </div>
 
@@ -267,8 +270,9 @@ export default function BuilderPageClient({ initialResume }: BuilderPageClientPr
         `}</style>
 
         {/* Mobile View Toggles */}
-        <div className="h-full lg:hidden overflow-y-auto">
+        <div className="h-full lg:hidden overflow-y-auto p-4">
           {panelTab === 'sections' ? <SectionToolbar /> : null}
+          {panelTab === 'design' ? <DesignSettings /> : null}
           {panelTab === 'canvas' ? <BuilderCanvas /> : null}
           {panelTab === 'editor' ? <FieldEditor /> : null}
         </div>

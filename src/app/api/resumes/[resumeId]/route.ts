@@ -18,6 +18,7 @@ type ResumeRow = {
   title: string;
   template_id: TemplateId;
   is_public: boolean;
+  settings: any;
   last_edited_at: string | null;
   created_at: string;
   updated_at: string;
@@ -70,10 +71,18 @@ const mapResume = (
   const mappedSections: ResumeSection[] = sections.map((section) => {
     const sectionItems = itemsBySectionId.get(section.id) ?? [];
 
+    // Workaround for DB constraint: Detect if this 'custom' section is actually 'key_achievements'
+    const isKeyAchievements = section.type === 'custom' && (
+      section.title === 'Key Achievements' ||
+      sectionItems.some(item => (item.data as any)?.type === 'key_achievements')
+    );
+
+    const effectiveType = isKeyAchievements ? 'key_achievements' : section.type;
+
     return {
       id: section.id,
       resumeId: section.resume_id,
-      type: section.type,
+      type: effectiveType,
       title: section.title,
       isVisible: section.is_visible,
       sortOrder: section.position,
@@ -82,16 +91,16 @@ const mapResume = (
       items: sectionItems.map((item) => {
         const parsedData = sectionItemDataSchema.safeParse(item.data);
         const itemData =
-          parsedData.success && parsedData.data.type === section.type
+          parsedData.success && parsedData.data.type === effectiveType
             ? parsedData.data
-            : getDefaultSectionItem(section.type);
+            : getDefaultSectionItem(effectiveType);
 
         return {
           id: item.id,
           sectionId: item.section_id,
           resumeId: section.resume_id,
           sortOrder: item.position,
-          type: section.type,
+          type: effectiveType,
           data: itemData,
           createdAt: item.created_at,
           updatedAt: item.updated_at,
@@ -105,6 +114,12 @@ const mapResume = (
     userId: resumeRow.user_id,
     title: resumeRow.title,
     templateId: resumeRow.template_id,
+    settings: resumeRow.settings || {
+      fontSize: 'medium',
+      fontFamily: 'Inter',
+      primaryColor: '#000000',
+      backgroundColor: '#ffffff',
+    },
     sections: mappedSections,
     createdAt: resumeRow.created_at,
     updatedAt: resumeRow.updated_at,
@@ -147,10 +162,10 @@ const loadResume = async (
   const { data: items, error: itemsError } =
     sectionIds.length > 0
       ? await supabase
-          .from('section_items')
-          .select('*')
-          .in('section_id', sectionIds)
-          .order('position', { ascending: true })
+        .from('section_items')
+        .select('*')
+        .in('section_id', sectionIds)
+        .order('position', { ascending: true })
       : { data: [], error: null as null };
 
   if (itemsError) {
@@ -190,7 +205,7 @@ export async function GET(
     }
 
     if (resume.userId !== user.id) {
-       return jsonError('Forbidden', 403);
+      return jsonError('Forbidden', 403);
     }
 
     return NextResponse.json({ resume });
@@ -250,13 +265,14 @@ export async function PUT(
       .update({
         title: parsedResume.data.title,
         template_id: parsedResume.data.templateId,
+        settings: parsedResume.data.settings,
         last_edited_at: now,
       })
       .eq('id', parsedResume.data.id)
       .eq('user_id', user.id);
 
     if (resumeUpdateError) {
-      throw new Error(resumeUpdateError.message);
+      return jsonError(`Resume Update Error: ${resumeUpdateError.message}`, 500);
     }
 
     const { data: existingSections, error: existingSectionsError } = await supabase
@@ -265,7 +281,7 @@ export async function PUT(
       .eq('resume_id', parsedResume.data.id);
 
     if (existingSectionsError) {
-      throw new Error(existingSectionsError.message);
+      return jsonError(`Fetch Error: ${existingSectionsError.message}`, 500);
     }
 
     const sectionIds = parsedResume.data.sections.map((section) => section.id);
@@ -277,13 +293,13 @@ export async function PUT(
     const { data: existingItems, error: existingItemsError } =
       sectionIds.length > 0
         ? await supabase
-            .from('section_items')
-            .select('id')
-            .in('section_id', sectionIds)
+          .from('section_items')
+          .select('id')
+          .in('section_id', sectionIds)
         : { data: [], error: null as null };
 
     if (existingItemsError) {
-      throw new Error(existingItemsError.message);
+      return jsonError(`Fetch Items Error: ${existingItemsError.message}`, 500);
     }
 
     const itemIds = parsedResume.data.sections.flatMap((section) =>
@@ -299,7 +315,7 @@ export async function PUT(
         .in('id', itemIdsToDelete);
 
       if (deleteItemsError) {
-        throw new Error(deleteItemsError.message);
+        return jsonError(`Delete Items Error: ${deleteItemsError.message}`, 500);
       }
     }
 
@@ -310,14 +326,14 @@ export async function PUT(
         .in('id', sectionIdsToDelete);
 
       if (deleteSectionsError) {
-        throw new Error(deleteSectionsError.message);
+        return jsonError(`Delete Sections Error: ${deleteSectionsError.message}`, 500);
       }
     }
 
     const sectionPayload = parsedResume.data.sections.map((section) => ({
       id: section.id,
       resume_id: parsedResume.data.id,
-      type: section.type,
+      type: section.type === 'key_achievements' ? 'custom' : section.type,
       title: section.title,
       position: section.sortOrder,
       is_visible: section.isVisible,
@@ -329,7 +345,7 @@ export async function PUT(
         .upsert(sectionPayload, { onConflict: 'id' });
 
       if (upsertSectionsError) {
-        throw new Error(upsertSectionsError.message);
+        return jsonError(`Upsert Sections Error: ${upsertSectionsError.message}`, 500);
       }
     }
 
@@ -348,7 +364,7 @@ export async function PUT(
         .upsert(itemPayload, { onConflict: 'id' });
 
       if (upsertItemsError) {
-        throw new Error(upsertItemsError.message);
+        return jsonError(`Upsert Items Error: ${upsertItemsError.message}`, 500);
       }
     }
 
@@ -360,7 +376,7 @@ export async function PUT(
 
     return NextResponse.json({ resume: refreshedResume });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to save resume';
+    const message = error instanceof Error ? error.message : 'Unexpected Error';
     return jsonError(message, 500);
   }
 }
@@ -403,7 +419,7 @@ export async function PATCH(
     }
 
     if (resume.user_id !== user.id) {
-       return jsonError('Forbidden', 403);
+      return jsonError('Forbidden', 403);
     }
 
     const updatePayload: any = {};

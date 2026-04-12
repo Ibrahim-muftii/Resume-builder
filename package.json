@@ -43,9 +43,12 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "autoprefixer": "^10.4.20",
+    "chrome-aws-lambda": "^10.1.0",
     "eslint": "^9.22.0",
     "eslint-config-next": "16.1.6",
     "postcss": "^8.5.3",
+    "puppeteer": "^24.40.0",
+    "puppeteer-core": "^24.40.0",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.8.2"
   }

@@ -14,7 +14,7 @@ const isValidDateString = (value: string): boolean => {
 };
 
 const nonEmptyStringSchema = z.string().trim().min(1, 'This field is required');
-const draftStringSchema = z.string().trim().min(0).default('');
+const draftStringSchema = z.string().trim().min(0);
 
 const urlOrEmptyStringSchema = z.union([
   z.literal(''),
@@ -63,8 +63,8 @@ export const experienceSchema = z.object({
   startDate: nullableDateStringSchema,
   endDate: nullableDateStringSchema,
   isCurrent: z.boolean(),
-  description: draftStringSchema,
-  achievements: z.array(z.string().trim()),
+  descriptionTitle: draftStringSchema,
+  descriptionBullets: z.array(z.string().trim()),
 });
 
 export const educationSchema = z.object({
@@ -77,7 +77,6 @@ export const educationSchema = z.object({
   endDate: nullableDateStringSchema,
   isCurrent: z.boolean(),
   gpa: z.union([z.string(), z.undefined()]),
-  achievements: z.array(z.string().trim()),
 });
 
 export const skillLevelSchema = z.enum([
@@ -97,13 +96,10 @@ export const skillSchema = z.object({
 export const projectSchema = z.object({
   type: z.literal('projects'),
   name: draftStringSchema,
-  description: draftStringSchema,
-  technologies: z.array(z.string()),
+  descriptionTitle: draftStringSchema,
+  descriptionBullets: z.array(z.string().trim()),
   url: optionalUrlSchema,
   githubUrl: optionalUrlSchema,
-  startDate: nullableDateStringSchema,
-  endDate: nullableDateStringSchema,
-  isCurrent: z.boolean(),
 });
 
 export const certificationSchema = z.object({
@@ -136,6 +132,19 @@ export const customSchema = z.object({
   content: draftStringSchema,
 });
 
+export const keyAchievementSchema = z.object({
+  type: z.literal('key_achievements'),
+  title: draftStringSchema,
+  description: draftStringSchema,
+});
+
+export const resumeSettingsSchema = z.object({
+  fontSize: z.enum(['small', 'medium', 'large']).default('medium'),
+  fontFamily: z.string().default('Inter'),
+  primaryColor: z.string().default('#000000'),
+  backgroundColor: z.string().default('#ffffff'),
+});
+
 export const sectionItemDataSchema = z.discriminatedUnion('type', [
   personalInfoSchema,
   experienceSchema,
@@ -144,6 +153,7 @@ export const sectionItemDataSchema = z.discriminatedUnion('type', [
   projectSchema,
   certificationSchema,
   languageSchema,
+  keyAchievementSchema,
   customSchema,
 ]);
 
@@ -160,6 +170,7 @@ const sectionItemSchema = z.object({
     'projects',
     'certifications',
     'languages',
+    'key_achievements',
     'custom',
   ]),
   data: sectionItemDataSchema,
@@ -178,6 +189,7 @@ const resumeSectionSchema = z.object({
     'projects',
     'certifications',
     'languages',
+    'key_achievements',
     'custom',
   ]),
   title: nonEmptyStringSchema,
@@ -200,6 +212,7 @@ export const resumeSchema = z.object({
     'executive',
     'professional',
   ]),
+  settings: resumeSettingsSchema,
   sections: z.array(resumeSectionSchema),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -213,6 +226,8 @@ export type ProjectSchemaType = z.infer<typeof projectSchema>;
 export type CertificationSchemaType = z.infer<typeof certificationSchema>;
 export type LanguageSchemaType = z.infer<typeof languageSchema>;
 export type CustomSchemaType = z.infer<typeof customSchema>;
+export type KeyAchievementSchemaType = z.infer<typeof keyAchievementSchema>;
+export type ResumeSettingsSchemaType = z.infer<typeof resumeSettingsSchema>;
 export type SectionItemDataSchemaType = z.infer<typeof sectionItemDataSchema>;
 export type ResumeSchemaType = z.infer<typeof resumeSchema>;
 
@@ -231,6 +246,7 @@ export type ImportedResumeTypes = {
   CertificationData: ResumeTypes.CertificationData;
   LanguageData: ResumeTypes.LanguageData;
   CustomData: ResumeTypes.CustomData;
+  KeyAchievementData: ResumeTypes.KeyAchievementData;
   Template: ResumeTypes.Template;
   DragItem: ResumeTypes.DragItem;
 };

@@ -52,6 +52,12 @@ export const SECTION_TYPE_META = {
     icon: 'languages',
     isRepeatable: true,
   },
+  key_achievements: {
+    label: 'Key Achievements',
+    description: 'Specific accomplishments and wins you want to highlight.',
+    icon: 'trophy',
+    isRepeatable: true,
+  },
   custom: {
     label: 'Custom',
     description: 'Flexible section for custom resume content.',
@@ -87,8 +93,8 @@ export function getDefaultSectionItem(
         startDate: '',
         endDate: '',
         isCurrent: false,
-        description: '',
-        achievements: [],
+        descriptionTitle: '',
+        descriptionBullets: [],
       };
     case 'education':
       return {
@@ -101,7 +107,6 @@ export function getDefaultSectionItem(
         endDate: '',
         isCurrent: false,
         gpa: '',
-        achievements: [],
       };
     case 'skills':
       return {
@@ -114,13 +119,10 @@ export function getDefaultSectionItem(
       return {
         type,
         name: '',
-        description: '',
-        technologies: [],
+        descriptionTitle: '',
+        descriptionBullets: [],
         url: '',
         githubUrl: '',
-        startDate: '',
-        endDate: '',
-        isCurrent: false,
       };
     case 'certifications':
       return {
@@ -137,6 +139,12 @@ export function getDefaultSectionItem(
         type,
         name: '',
         proficiency: 'elementary',
+      };
+    case 'key_achievements':
+      return {
+        type,
+        title: '',
+        description: '',
       };
     case 'custom':
       return {

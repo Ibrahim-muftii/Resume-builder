@@ -1,8 +1,7 @@
 'use client';
 
-import { Plus, Trash2 } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,7 +28,6 @@ export default function EducationSection({ item, onSave, onCancel }: SectionForm
           endDate: item.data.endDate ? item.data.endDate : null,
           isCurrent: item.data.isCurrent,
           gpa: item.data.gpa ?? '',
-          achievements: item.data.achievements,
         }
       : {
           type: 'education',
@@ -41,24 +39,17 @@ export default function EducationSection({ item, onSave, onCancel }: SectionForm
           endDate: null,
           isCurrent: false,
           gpa: '',
-          achievements: [],
         };
 
   const {
     register,
-    control,
     watch,
     handleSubmit,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<EducationSchemaType>({
-    resolver: zodResolver(educationSchema),
-    defaultValues: defaults,
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'achievements',
+    resolver: zodResolver(educationSchema) as any,
+    defaultValues: defaults as any,
   });
 
   const isCurrent = watch('isCurrent');
@@ -136,25 +127,6 @@ export default function EducationSection({ item, onSave, onCancel }: SectionForm
         <Label htmlFor="gpa" className="font-semibold text-zinc-800">GPA <span className="font-normal text-zinc-500">(optional)</span></Label>
         <Input id="gpa" placeholder="3.8" {...register('gpa')} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
         {errors.gpa ? <p className="text-xs font-medium text-red-500">{errors.gpa.message}</p> : null}
-      </div>
-
-      <div className="space-y-3">
-        <Label className="font-semibold text-zinc-800">Achievements</Label>
-        <Button type="button" variant="outline" size="sm" onClick={() => append('')} className="w-full gap-2">
-          <Plus className="h-4 w-4" />
-          Add Achievement
-        </Button>
-        <div className="space-y-2">
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
-              <Input placeholder="Key achievement..." {...register(`achievements.${index}`)} className="border-zinc-200 bg-zinc-50 focus:bg-white" />
-              <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)} className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-        {errors.achievements ? <p className="text-xs font-medium text-red-500">{errors.achievements.message as string}</p> : null}
       </div>
 
       <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4">

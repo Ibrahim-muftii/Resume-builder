@@ -1,0 +1,1 @@
+ALTER TABLE public.resumes ADD COLUMN IF NOT EXISTS settings JSONB DEFAULT '{"fontSize": "medium", "fontFamily": "Inter", "primaryColor": "#000000", "backgroundColor": "#ffffff"}'::jsonb;

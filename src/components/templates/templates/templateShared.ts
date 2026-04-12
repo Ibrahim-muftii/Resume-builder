@@ -60,6 +60,24 @@ export const getScaleClass = (scale?: number): string => {
   return 'origin-top-left scale-100';
 };
 
+export const getTemplateStyles = (resume: Resume) => {
+  const { settings } = resume;
+  if (!settings) return {};
+
+  const fontSizeMap = {
+    small: '0.85rem',
+    medium: '1rem',
+    large: '1.25rem',
+  };
+
+  return {
+    '--font-family': settings.fontFamily,
+    '--font-size': fontSizeMap[settings.fontSize] || '1rem',
+    '--primary-color': settings.primaryColor,
+    '--background-color': settings.backgroundColor,
+  } as React.CSSProperties;
+};
+
 export const sectionTypes = {
   personalInfo: 'personal_info' as SectionType,
   experience: 'experience' as SectionType,
@@ -68,5 +86,6 @@ export const sectionTypes = {
   projects: 'projects' as SectionType,
   certifications: 'certifications' as SectionType,
   languages: 'languages' as SectionType,
+  keyAchievements: 'key_achievements' as SectionType,
   custom: 'custom' as SectionType,
 };

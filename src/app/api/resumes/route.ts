@@ -47,6 +47,7 @@ type SectionItemRow = {
 
 const createResumeSchema = z.object({
   title: z.string().trim().min(1).optional(),
+  templateId: z.enum(['modern', 'classic', 'minimal', 'creative', 'executive', 'professional']).optional(),
 });
 
 const defaultSectionOrder: SectionType[] = [
@@ -195,12 +196,13 @@ const loadResumeList = async (
 const createDefaultResumeStructure = async (
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
-  title?: string
+  title?: string,
+  templateId?: TemplateId
 ): Promise<Resume> => {
   const insertPayload = {
     user_id: userId,
     title: title || 'Untitled Resume',
-    template_id: 'modern' as const,
+    template_id: templateId || ('modern' as const),
   };
 
   const { data: createdResume, error: resumeInsertError } = await supabase
@@ -318,7 +320,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const createdResume = await createDefaultResumeStructure(
       supabase,
       user.id,
-      parsed.data.title
+      parsed.data.title,
+      parsed.data.templateId as TemplateId | undefined
     );
 
     return NextResponse.json(createdResume, { status: 201 });

@@ -12,6 +12,7 @@ import {
   PenTool,
   Search,
   Sparkles,
+  Trophy,
   UserRound,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -41,6 +42,7 @@ const sectionTypeOrder: SectionType[] = [
   'education',
   'skills',
   'projects',
+  'key_achievements',
   'certifications',
   'languages',
   'custom',
@@ -54,6 +56,7 @@ const iconMap: Record<SectionType, React.ReactNode> = {
   projects: <FolderKanban className="h-4 w-4" />,
   certifications: <BadgeCheck className="h-4 w-4" />,
   languages: <Languages className="h-4 w-4" />,
+  key_achievements: <Trophy className="h-4 w-4" />,
   custom: <PenTool className="h-4 w-4" />,
 };
 
@@ -116,7 +119,7 @@ export function AddSectionModal({ open, onOpenChange }: AddSectionModalProps) {
     const nextSection = getDefaultSection(type, resume.id, resume.sections.length);
     const supabase = createClient();
     const insertedSectionId = nextSection.id;
-    const insertedItem = nextSection.items[0];
+    const insertedItem = nextSection.items[0] as any;
 
     addSection(nextSection);
     setPendingSectionType(type);
@@ -125,7 +128,7 @@ export function AddSectionModal({ open, onOpenChange }: AddSectionModalProps) {
       const { error: sectionInsertError } = await supabase.from('resume_sections').insert({
         id: insertedSectionId,
         resume_id: resume.id,
-        type: nextSection.type,
+        type: (nextSection.type === 'key_achievements' ? 'custom' : nextSection.type) as any,
         title: nextSection.title,
         position: nextSection.sortOrder,
         is_visible: nextSection.isVisible,

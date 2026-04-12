@@ -12,6 +12,7 @@ type ResumeStoreState = {
   setResume: (resume: Resume) => void;
   updateResumeTitle: (title: string) => void;
   updateTemplate: (templateId: TemplateId) => void;
+  updateSettings: (settings: Partial<Resume['settings']>) => void;
   reorderSections: (sections: ResumeSection[]) => void;
   toggleSectionVisibility: (sectionId: string) => void;
   addSection: (section: ResumeSection) => void;
@@ -82,7 +83,15 @@ export const useResumeStore = create<ResumeStoreState>((set, get) => ({
   history: [],
   setResume: (resume) =>
     set({
-      resume: cloneResume(resume),
+      resume: {
+        ...cloneResume(resume),
+        settings: resume.settings || {
+          fontSize: 'medium',
+          fontFamily: 'Inter',
+          primaryColor: '#000000',
+          backgroundColor: '#ffffff',
+        },
+      },
       isDirty: false,
       saveError: null,
       activeSection: null,
@@ -98,6 +107,14 @@ export const useResumeStore = create<ResumeStoreState>((set, get) => ({
     withResumeUpdate(get, set, (resume) => ({
       ...resume,
       templateId,
+    })),
+  updateSettings: (settings) =>
+    withResumeUpdate(get, set, (resume) => ({
+      ...resume,
+      settings: {
+        ...resume.settings,
+        ...settings,
+      },
     })),
   reorderSections: (sections) =>
     withResumeUpdate(get, set, (resume) => ({

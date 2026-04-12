@@ -1,208 +1,143 @@
 import {
-  Briefcase,
   Github,
   Globe,
   Linkedin,
   Mail,
   MapPin,
   Phone,
-  Sparkles,
-  GraduationCap,
-  FolderKanban,
-  BadgeCheck,
-  Languages,
-  PenTool,
 } from 'lucide-react';
-import type { ResumeSection } from '../../../../lib/types/resume';
+import type { 
+  ResumeSection, 
+  ExperienceData, 
+  EducationData, 
+  SkillData, 
+  ProjectData, 
+  PersonalInfoData,
+  LanguageData,
+  CertificationData,
+  KeyAchievementData,
+  CustomData
+} from '../../../../lib/types/resume';
 import { cn } from '../../../lib/utils';
-import { getScaleClass, getVisibleSections, hasSectionContent, sectionTypes, type TemplateProps } from './templateShared';
+import { getScaleClass, getVisibleSections, hasSectionContent, type TemplateProps, getTemplateStyles } from './templateShared';
+import { SectionIcon } from './SectionIcon';
 
 const hasText = (value: string | undefined): boolean => Boolean(value && value.trim().length > 0);
 
-const iconClass = 'h-4 w-4 text-rose-500';
-
-const personalIconMap = {
-  email: Mail,
-  phone: Phone,
-  location: MapPin,
-  website: Globe,
-  linkedin: Linkedin,
-  github: Github,
-} as const;
-
-const sectionIconMap: Record<string, typeof Briefcase> = {
-  [sectionTypes.experience]: Briefcase,
-  [sectionTypes.education]: GraduationCap,
-  [sectionTypes.projects]: FolderKanban,
-  [sectionTypes.certifications]: BadgeCheck,
-  [sectionTypes.languages]: Languages,
-  [sectionTypes.custom]: PenTool,
-  [sectionTypes.skills]: Sparkles,
-  [sectionTypes.personalInfo]: Briefcase,
-};
-
-const renderInfoLine = (icon: typeof Mail, value: string) => {
+const renderInfoLine = (icon: any, value: string) => {
   const Icon = icon;
   return (
-    <div className="flex items-start gap-3 text-sm">
-      <Icon className={iconClass} />
+    <div className="flex items-start gap-3" style={{ fontSize: '0.85em' }}>
+      <Icon className="h-4 w-4 opacity-70" />
       <span className="break-all">{value}</span>
     </div>
   );
 };
 
 const renderSection = (section: ResumeSection) => {
-  const SectionIcon = sectionIconMap[section.type] ?? Briefcase;
-
   return (
     <section key={section.id} className="space-y-4">
-      <div className="border-l-4 border-teal-500 pl-4">
+      <div className="border-l-4 pl-4" style={{ borderColor: 'var(--primary-color, #0d9488)' }}>
         <div className="flex items-center gap-2">
-          <SectionIcon className="h-5 w-5 text-teal-600" />
-          <h2 className="text-lg font-black uppercase tracking-[0.18em] text-slate-950">{section.title}</h2>
+          <SectionIcon type={section.type} className="h-5 w-5" style={{ color: 'var(--primary-color, #0d9488)' }} />
+          <h2 className="font-black uppercase tracking-[0.18em] text-slate-950" style={{ fontSize: '1em' }}>{section.title}</h2>
         </div>
       </div>
 
       <div className="space-y-4">
         {section.items.map((item) => {
-          if (section.type === 'experience' && item.type === 'experience') {
-            const data = item.data;
-            if (!hasText(data.company) && !hasText(data.position)) {
-              return null;
-            }
-
+          if (item.type === 'experience') {
+            const data = item.data as ExperienceData;
             return (
-              <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
+              <article key={item.id} data-resume-item className="rounded-2xl border border-teal-50 bg-white p-5 shadow-sm" style={{ breakInside: 'avoid' }}>
                 <div className="space-y-1">
-                  {hasText(data.position) ? <h3 className="text-lg font-semibold text-slate-950">{data.position}</h3> : null}
-                  {hasText(data.company) ? <p className="font-medium text-teal-700">{data.company}</p> : null}
-                  {hasText(data.location) ? <p className="text-sm text-slate-500">{data.location}</p> : null}
+                  {hasText(data.position) ? <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.position}</h3> : null}
+                  {hasText(data.company) ? <p className="font-medium" style={{ color: 'var(--primary-color, #0d9488)', fontSize: '0.9em' }}>{data.company}</p> : null}
+                  {hasText(data.location) ? <p className="text-slate-500" style={{ fontSize: '0.8em' }}>{data.location}</p> : null}
                 </div>
-                {hasText(data.description) ? <p className="mt-3 text-sm leading-6 text-slate-700">{data.description}</p> : null}
-                {data.achievements?.length > 0 ? (
-                  <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                    {data.achievements.map((achievement, index) => (
-                      <li key={`${item.id}-${index}`}>• {achievement}</li>
-                    ))}
+                {data.descriptionBullets && data.descriptionBullets.length > 0 && (
+                  <ul className="mt-3 space-y-1.5 text-slate-700" style={{ fontSize: '0.85em' }}>
+                    {data.descriptionBullets.map((bullet, i) => <li key={i}>• {bullet}</li>)}
                   </ul>
-                ) : null}
+                )}
               </article>
             );
           }
-
-          if (section.type === 'education' && item.type === 'education') {
-            const data = item.data;
-            if (!hasText(data.institution) && !hasText(data.degree)) {
-              return null;
-            }
-
+          if (item.type === 'education') {
+            const data = item.data as EducationData;
             return (
-              <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
-                <div className="space-y-1">
-                  {hasText(data.degree) ? <h3 className="text-lg font-semibold text-slate-950">{data.degree}</h3> : null}
-                  {hasText(data.field) ? <p className="font-medium text-teal-700">{data.field}</p> : null}
-                  {hasText(data.institution) ? <p className="text-sm text-slate-700">{data.institution}</p> : null}
-                  {hasText(data.location) ? <p className="text-sm text-slate-500">{data.location}</p> : null}
-                </div>
+              <article key={item.id} data-resume-item className="rounded-2xl border border-teal-50 bg-white p-5 shadow-sm" style={{ breakInside: 'avoid' }}>
+                {hasText(data.degree) ? <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.degree}</h3> : null}
+                {hasText(data.institution) ? <p className="font-medium" style={{ color: 'var(--primary-color, #0d9488)', fontSize: '0.9em' }}>{data.institution}</p> : null}
               </article>
             );
           }
-
-          if (section.type === 'projects' && item.type === 'projects') {
-            const data = item.data;
-            if (!hasText(data.name) && !hasText(data.description)) {
-              return null;
-            }
-
-            return (
-              <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
-                {hasText(data.name) ? <h3 className="text-lg font-semibold text-slate-950">{data.name}</h3> : null}
-                {hasText(data.description) ? <p className="mt-2 text-sm leading-6 text-slate-700">{data.description}</p> : null}
-                {data.technologies?.length > 0 ? (
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-white">
-                    {data.technologies.map((technology) => (
-                      <span key={`${item.id}-${technology}`} className="rounded-full bg-rose-500 px-3 py-1">
-                        {technology}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </article>
-            );
+          if (item.type === 'projects') {
+             const data = item.data as ProjectData;
+             return (
+               <article key={item.id} data-resume-item className="rounded-2xl border border-teal-50 bg-white p-5 shadow-sm" style={{ breakInside: 'avoid' }}>
+                  <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.name}</h3>
+                  {hasText(data.descriptionTitle) && <p className="mt-2 text-slate-600" style={{ fontSize: '0.85em' }}>{data.descriptionTitle}</p>}
+               </article>
+             );
           }
-
-          if (section.type === 'skills' && item.type === 'skills') {
-            const data = item.data;
-            if (!hasText(data.name)) {
-              return null;
-            }
-
+          if (item.type === 'skills') {
+            const data = item.data as SkillData;
             return (
-              <article key={item.id} className="flex items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm">
+              <article key={item.id} data-resume-item className="flex items-center justify-between gap-3 rounded-2xl border border-teal-50 bg-white p-4 shadow-sm" style={{ breakInside: 'avoid' }}>
                 <div>
-                  <h3 className="font-semibold text-slate-950">{data.name}</h3>
-                  {hasText(data.category) ? <p className="text-sm text-slate-500">{data.category}</p> : null}
+                  <h3 className="font-semibold text-slate-950" style={{ fontSize: '0.9em' }}>{data.name}</h3>
+                  <p className="text-slate-500" style={{ fontSize: '0.7em' }}>{data.category}</p>
                 </div>
-                <div className="h-2 w-24 rounded-full bg-teal-100">
-                  <div
-                    className={cn(
-                      'h-2 rounded-full bg-rose-500',
-                      data.level === 'beginner'
-                        ? 'w-1/4'
-                        : data.level === 'intermediate'
-                          ? 'w-1/2'
-                          : data.level === 'advanced'
-                            ? 'w-3/4'
-                            : 'w-full'
-                    )}
-                  />
+                <div className="h-1.5 w-24 rounded-full bg-slate-100">
+                  <div className="h-full rounded-full" style={{ 
+                    width: data.level === 'beginner' ? '25%' : data.level === 'intermediate' ? '50%' : data.level === 'advanced' ? '75%' : '100%',
+                    backgroundColor: 'var(--primary-color, #0d9488)' 
+                  }} />
                 </div>
               </article>
             );
           }
-
-          if (section.type === 'certifications' && item.type === 'certifications') {
-            const data = item.data;
-            if (!hasText(data.name) && !hasText(data.issuer)) {
-              return null;
-            }
-
+          if (item.type === 'languages') {
+            const data = item.data as LanguageData;
             return (
-              <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
-                {hasText(data.name) ? <h3 className="text-lg font-semibold text-slate-950">{data.name}</h3> : null}
-                {hasText(data.issuer) ? <p className="text-sm font-medium text-teal-700">{data.issuer}</p> : null}
+              <article key={item.id} data-resume-item className="flex items-center justify-between gap-3 rounded-2xl border border-teal-50 bg-white p-4 shadow-sm" style={{ breakInside: 'avoid' }}>
+                <div>
+                  <h3 className="font-semibold text-slate-950" style={{ fontSize: '0.9em' }}>{data.name}</h3>
+                  <p className="text-slate-500" style={{ fontSize: '0.7em' }}>{data.proficiency}</p>
+                </div>
               </article>
             );
           }
-
-          if (section.type === 'languages' && item.type === 'languages') {
-            const data = item.data;
-            if (!hasText(data.name)) {
-              return null;
-            }
-
+          if (item.type === 'certifications') {
+            const data = item.data as CertificationData;
             return (
-              <article key={item.id} className="flex items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm">
-                <h3 className="font-semibold text-slate-950">{data.name}</h3>
-                <span className="text-sm text-slate-500">{data.proficiency}</span>
+              <article key={item.id} data-resume-item className="flex items-center justify-between gap-3 rounded-2xl border border-teal-50 bg-white p-4 shadow-sm" style={{ breakInside: 'avoid' }}>
+                <div>
+                  <h3 className="font-semibold text-slate-950" style={{ fontSize: '0.9em' }}>{data.name}</h3>
+                  <p className="text-slate-500" style={{ fontSize: '0.7em' }}>{data.issuer}</p>
+                </div>
               </article>
             );
           }
-
-          if (section.type === 'custom' && item.type === 'custom') {
-            const data = item.data;
-            if (!hasText(data.title) && !hasText(data.content)) {
-              return null;
-            }
-
+          if (item.type === 'key_achievements') {
+            const data = item.data as KeyAchievementData;
             return (
-              <article key={item.id} className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
-                {hasText(data.title) ? <h3 className="text-lg font-semibold text-slate-950">{data.title}</h3> : null}
-                {hasText(data.content) ? <p className="mt-2 text-sm leading-6 text-slate-700">{data.content}</p> : null}
+              <article key={item.id} data-resume-item className="rounded-2xl border border-teal-50 bg-white p-5 shadow-sm" style={{ breakInside: 'avoid' }}>
+                <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.title}</h3>
+                <p className="mt-2 text-slate-700 whitespace-pre-wrap" style={{ fontSize: '0.85em' }}>{data.description}</p>
               </article>
             );
           }
-
+          if (item.type === 'custom') {
+            const data = item.data as CustomData;
+            return (
+              <article key={item.id} data-resume-item className="rounded-2xl border border-teal-50 bg-white p-5 shadow-sm" style={{ breakInside: 'avoid' }}>
+                <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.title}</h3>
+                <p className="mt-2 text-slate-700 whitespace-pre-wrap" style={{ fontSize: '0.85em' }}>{data.content}</p>
+              </article>
+            );
+          }
           return null;
         })}
       </div>
@@ -212,57 +147,51 @@ const renderSection = (section: ResumeSection) => {
 
 export default function CreativeTemplate({ resume, isPreview, scale }: TemplateProps) {
   const sections = getVisibleSections(resume).filter(hasSectionContent);
-  const isDemo = resume.id === 'demo-resume-id';
-  
-  const displaySections = isDemo ? resume.sections : sections;
-  const personalInfoSection = displaySections.find((section) => section.type === 'personal_info');
+  const displaySections = resume.id === 'demo-resume-id' ? resume.sections : sections;
+  const personalInfoSection = displaySections.find((s) => s.type === 'personal_info');
   const personalInfoItem = personalInfoSection?.items[0];
-  const leftSections = displaySections.filter((section) =>
-    ['skills', 'languages', 'certifications'].includes(section.type)
-  );
-  const rightSections = displaySections.filter((section) =>
-    ['experience', 'education', 'projects', 'custom'].includes(section.type)
-  );
+  const leftSections = displaySections.filter((s) => ['skills', 'languages', 'certifications'].includes(s.type));
+  const rightSections = displaySections.filter((s) => ['experience', 'education', 'projects', 'custom', 'key_achievements'].includes(s.type));
+  const customStyles = getTemplateStyles(resume);
 
   return (
-    <div className={cn('w-full min-h-[1100px] bg-zinc-50 text-slate-950', getScaleClass(scale), isPreview ? 'mx-auto' : '')}>
-      <div className="overflow-hidden rounded-3xl shadow-2xl">
-        {personalInfoItem && personalInfoItem.type === 'personal_info' ? (
-          (() => {
-            const data = personalInfoItem.data;
-            return (
-              <header className="bg-teal-600 px-8 py-10 text-white">
+    <div 
+      className={cn('w-full min-h-[1100px] text-zinc-950 antialiased font-serif', getScaleClass(scale), isPreview ? 'mx-auto' : '')}
+      style={{
+        ...customStyles,
+        fontFamily: 'var(--font-family, serif)',
+        backgroundColor: 'var(--background-color, #f9fafb)',
+        fontSize: 'var(--font-size, 16px)',
+      }}
+    >
+      <div className="overflow-hidden lg:rounded-3xl shadow-2xl">
+        {personalInfoItem?.type === 'personal_info' && (
+          <header className="px-8 py-12 text-white" style={{ backgroundColor: 'var(--primary-color, #0d9488)' }}>
+            {(() => {
+              const data = personalInfoItem.data as PersonalInfoData;
+              return (
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                   <div className="space-y-2">
-                    {data.fullName ? (
-                      <h1 className="text-4xl font-black tracking-tight">{data.fullName}</h1>
-                    ) : null}
-                    {data.jobTitle ? (
-                      <p className="text-lg font-medium text-teal-50">{data.jobTitle}</p>
-                    ) : null}
+                    <h1 className="font-black tracking-tight" style={{ fontSize: '3em' }}>{data.fullName}</h1>
+                    <p className="font-medium opacity-90" style={{ fontSize: '1.2em' }}>{data.jobTitle}</p>
                   </div>
-
-                  <div className="grid gap-3 text-sm text-teal-50 sm:grid-cols-2 xl:grid-cols-3">
-                    {data.email ? renderInfoLine(Mail, data.email) : null}
-                    {data.phone ? renderInfoLine(Phone, data.phone) : null}
-                    {data.location ? renderInfoLine(MapPin, data.location) : null}
-                    {data.website ? renderInfoLine(Globe, data.website) : null}
-                    {data.linkedin ? renderInfoLine(Linkedin, data.linkedin) : null}
-                    {data.github ? renderInfoLine(Github, data.github) : null}
+                  <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 opacity-90">
+                    {data.email && renderInfoLine(Mail, data.email)}
+                    {data.phone && renderInfoLine(Phone, data.phone)}
+                    {data.location && renderInfoLine(MapPin, data.location)}
                   </div>
                 </div>
-              </header>
-            );
-          })()
-        ) : null}
+              );
+            })()}
+          </header>
+        )}
 
-        <div className="grid grid-cols-1 gap-0 bg-white lg:grid-cols-[35%_65%]">
-          <aside className="space-y-8 bg-teal-50 px-8 py-10">
-            {leftSections.map((section) => renderSection(section))}
+        <div className="grid grid-cols-1 gap-0 bg-white lg:grid-cols-[35%_65%] min-h-[900px]">
+          <aside className="space-y-8 bg-zinc-50/50 px-8 py-10 border-r border-zinc-100">
+            {leftSections.map(renderSection)}
           </aside>
-
           <main className="space-y-8 px-8 py-10">
-            {rightSections.map((section) => renderSection(section))}
+            {rightSections.map(renderSection)}
           </main>
         </div>
       </div>

@@ -1,192 +1,197 @@
-import type { ResumeSection } from '../../../../lib/types/resume';
+import type { 
+  ResumeSection, 
+  ExperienceData, 
+  EducationData, 
+  SkillData, 
+  ProjectData, 
+  PersonalInfoData,
+  CertificationData,
+  LanguageData,
+  KeyAchievementData,
+  CustomData
+} from '../../../../lib/types/resume';
 import { cn } from '../../../lib/utils';
-import { getScaleClass, getVisibleSections, hasSectionContent, sectionTypes, type TemplateProps } from './templateShared';
+import { getScaleClass, getVisibleSections, hasSectionContent, type TemplateProps, getTemplateStyles } from './templateShared';
+import { SectionIcon } from './SectionIcon';
 
 const hasText = (value: string | undefined): boolean => Boolean(value && value.trim().length > 0);
 
-const renderCardSection = (section: ResumeSection) => (
-  <section key={section.id} className="space-y-4">
-    <h2 className="border-b-2 border-yellow-600 pb-2 text-sm font-semibold uppercase tracking-[0.22em] text-slate-950">
-      {section.title}
-    </h2>
+const renderSection = (section: ResumeSection) => {
+  return (
+    <div key={section.id} style={{ display: 'block', marginBottom: '24px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+      <div className="flex items-center gap-3 border-b-2 pb-2" style={{ borderColor: 'var(--primary-color, #0f172a)', marginBottom: '16px' }}>
+        <SectionIcon type={section.type} className="h-4 w-4" style={{ color: 'var(--primary-color, #0f172a)' }} />
+        <h2 className="font-bold uppercase tracking-[0.2em] text-slate-900" style={{ fontSize: '0.85em' }}>{section.title}</h2>
+      </div>
 
-    <div className="space-y-4">
-      {section.items.map((item) => {
-        if (section.type === 'experience' && item.type === 'experience') {
-          const data = item.data;
-          if (!hasText(data.company) && !hasText(data.position)) {
-            return null;
+      <div style={{ display: 'block' }}>
+        {section.items.map((item) => {
+          if (item.type === 'experience') {
+            const data = item.data as ExperienceData;
+            return (
+              <article key={item.id} data-resume-item className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" style={{ display: 'block', marginBottom: '16px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                {hasText(data.position) ? <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.position}</h3> : null}
+                {hasText(data.company) ? <p className="font-medium text-slate-700" style={{ fontSize: '0.9em' }}>{data.company}</p> : null}
+                <div className="mt-2 space-y-1 text-slate-600" style={{ fontSize: '0.85em' }}>
+                  {data.descriptionBullets && data.descriptionBullets.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {data.descriptionBullets.map((bullet: string, i: number) => <li key={i}>• {bullet}</li>)}
+                    </ul>
+                  )}
+                </div>
+              </article>
+            );
+          }
+          
+          if (item.type === 'education') {
+            const data = item.data as EducationData;
+            return (
+              <article key={item.id} data-resume-item className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" style={{ display: 'block', marginBottom: '16px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                <div className="flex justify-between items-baseline">
+                   {hasText(data.degree) ? <h3 className="font-semibold text-slate-950" style={{ fontSize: '1em' }}>{data.degree}</h3> : null}
+                   <span className="text-slate-400" style={{ fontSize: '0.75em' }}>{data.startDate} - {data.endDate}</span>
+                </div>
+                {hasText(data.institution) ? <p className="font-medium text-slate-700" style={{ fontSize: '0.85em' }}>{data.institution}</p> : null}
+                {hasText(data.location) && <p className="text-slate-400 mt-1" style={{ fontSize: '0.75em' }}>{data.location}</p>}
+              </article>
+            );
           }
 
-          return (
-            <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md">
-              {hasText(data.position) ? <h3 className="text-lg font-semibold text-slate-950">{data.position}</h3> : null}
-              {hasText(data.company) ? <p className="text-sm font-medium text-slate-700">{data.company}</p> : null}
-              <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
-                {hasText(data.location) ? <p>{data.location}</p> : null}
-                {hasText(data.description) ? <p>{data.description}</p> : null}
-              </div>
-              {data.achievements?.length > 0 ? (
-                <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                  {data.achievements.map((achievement, index) => (
-                    <li key={`${item.id}-${index}`}>• {achievement}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </article>
-          );
-        }
-
-        if (section.type === 'education' && item.type === 'education') {
-          const data = item.data;
-          if (!hasText(data.institution) && !hasText(data.degree)) {
-            return null;
+          if (item.type === 'projects') {
+            const data = item.data as ProjectData;
+            return (
+              <article key={item.id} data-resume-item className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" style={{ display: 'block', marginBottom: '16px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.name}</h3>
+                {hasText(data.descriptionTitle) && <p className="text-slate-500 italic mb-2" style={{ fontSize: '0.8em' }}>{data.descriptionTitle}</p>}
+                {data.descriptionBullets && data.descriptionBullets.length > 0 && (
+                  <ul className="space-y-1 text-slate-600" style={{ fontSize: '0.85em' }}>
+                    {data.descriptionBullets.map((b: string, i: number) => <li key={i}>• {b}</li>)}
+                  </ul>
+                )}
+              </article>
+            );
           }
 
-          return (
-            <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md">
-              {hasText(data.degree) ? <h3 className="text-lg font-semibold text-slate-950">{data.degree}</h3> : null}
-              {hasText(data.field) ? <p className="text-sm font-medium text-slate-700">{data.field}</p> : null}
-              {hasText(data.institution) ? <p className="text-sm text-slate-700">{data.institution}</p> : null}
-              {hasText(data.location) ? <p className="mt-2 text-sm text-slate-500">{data.location}</p> : null}
-            </article>
-          );
-        }
-
-        if (section.type === 'projects' && item.type === 'projects') {
-          const data = item.data;
-          if (!hasText(data.name) && !hasText(data.description)) {
-            return null;
+          if (item.type === 'skills') {
+            const data = item.data as SkillData;
+            return (
+              <article key={item.id} data-resume-item className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 mb-2" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                  <span className="font-bold uppercase tracking-wider text-slate-900" style={{ fontSize: '0.75em' }}>{data.name}</span>
+                  <span className="text-slate-400 uppercase" style={{ fontSize: '0.65em' }}>{data.level}</span>
+              </article>
+            );
           }
 
-          return (
-            <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md">
-              {hasText(data.name) ? <h3 className="text-lg font-semibold text-slate-950">{data.name}</h3> : null}
-              {hasText(data.description) ? <p className="mt-2 text-sm leading-6 text-slate-700">{data.description}</p> : null}
-              {data.technologies?.length > 0 ? <p className="mt-3 text-sm text-slate-500">{data.technologies.join(' ')}</p> : null}
-            </article>
-          );
-        }
-
-        if (section.type === 'skills' && item.type === 'skills') {
-          const data = item.data;
-          if (!hasText(data.name)) {
-            return null;
+          if (item.type === 'certifications') {
+            const data = item.data as CertificationData;
+            return (
+              <article key={item.id} data-resume-item className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 mb-2" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                  <span className="font-bold uppercase tracking-wider text-slate-900" style={{ fontSize: '0.75em' }}>{data.name}</span>
+                  <span className="text-slate-400 uppercase" style={{ fontSize: '0.65em' }}>{data.issuer}</span>
+              </article>
+            );
           }
 
-          return (
-            <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-950">{data.name}</h3>
-              {hasText(data.category) ? <p className="mt-2 text-sm text-slate-500">{data.category}</p> : null}
-            </article>
-          );
-        }
-
-        if (section.type === 'certifications' && item.type === 'certifications') {
-          const data = item.data;
-          if (!hasText(data.name) && !hasText(data.issuer)) {
-            return null;
+          if (item.type === 'languages') {
+            const data = item.data as LanguageData;
+            return (
+              <article key={item.id} data-resume-item className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 mb-2" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                  <span className="font-bold uppercase tracking-wider text-slate-900" style={{ fontSize: '0.75em' }}>{data.name}</span>
+                  <span className="text-slate-400 uppercase" style={{ fontSize: '0.65em' }}>{data.proficiency}</span>
+              </article>
+            );
           }
 
-          return (
-            <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md">
-              {hasText(data.name) ? <h3 className="text-lg font-semibold text-slate-950">{data.name}</h3> : null}
-              {hasText(data.issuer) ? <p className="text-sm text-slate-700">{data.issuer}</p> : null}
-            </article>
-          );
-        }
-
-        if (section.type === 'languages' && item.type === 'languages') {
-          const data = item.data;
-          if (!hasText(data.name)) {
-            return null;
+          if (item.type === 'key_achievements') {
+            const data = item.data as KeyAchievementData;
+            return (
+              <article key={item.id} data-resume-item className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" style={{ display: 'block', marginBottom: '16px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.title}</h3>
+                <p className="mt-1 text-slate-700 whitespace-pre-wrap" style={{ fontSize: '0.85em' }}>{data.description}</p>
+              </article>
+            );
           }
 
-          return (
-            <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-950">{data.name}</h3>
-              <p className="mt-2 text-sm text-slate-500">{data.proficiency}</p>
-            </article>
-          );
-        }
-
-        if (section.type === 'custom' && item.type === 'custom') {
-          const data = item.data;
-          if (!hasText(data.title) && !hasText(data.content)) {
-            return null;
+          if (item.type === 'custom') {
+            const data = item.data as CustomData;
+            return (
+              <article key={item.id} data-resume-item className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" style={{ display: 'block', marginBottom: '16px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                <h3 className="font-semibold text-slate-950" style={{ fontSize: '1.1em' }}>{data.title}</h3>
+                <p className="mt-1 text-slate-700 whitespace-pre-wrap" style={{ fontSize: '0.85em' }}>{data.content}</p>
+              </article>
+            );
           }
-
-          return (
-            <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md">
-              {hasText(data.title) ? <h3 className="text-lg font-semibold text-slate-950">{data.title}</h3> : null}
-              {hasText(data.content) ? <p className="mt-2 text-sm leading-6 text-slate-700">{data.content}</p> : null}
-            </article>
-          );
-        }
-
-        return null;
-      })}
+          
+          return null;
+        })}
+      </div>
     </div>
-  </section>
-);
+  );
+};
 
 export default function ExecutiveTemplate({ resume, isPreview, scale }: TemplateProps) {
   const sections = getVisibleSections(resume).filter(hasSectionContent);
-  const isDemo = resume.id === 'demo-resume-id';
-  
-  const displaySections = isDemo ? resume.sections : sections;
-  const personalInfoSection = displaySections.find((section) => section.type === 'personal_info');
+  const displaySections = resume.id === 'demo-resume-id' ? resume.sections : sections;
+  const personalInfoSection = displaySections.find((s) => s.type === 'personal_info');
   const personalInfoItem = personalInfoSection?.items[0];
-  const leftSections = displaySections.filter((section) =>
-    ['skills', 'languages', 'certifications'].includes(section.type)
-  );
-  const rightSections = displaySections.filter((section) =>
-    ['experience', 'education', 'projects', 'custom'].includes(section.type)
-  );
+  const leftSections = displaySections.filter((s) => ['skills', 'languages', 'certifications'].includes(s.type));
+  const rightSections = displaySections.filter((s) => ['experience', 'education', 'projects', 'custom', 'key_achievements'].includes(s.type));
+  const customStyles = getTemplateStyles(resume);
 
   return (
-    <div className={cn('w-full min-h-[1100px] bg-slate-100 text-slate-950', getScaleClass(scale), isPreview ? 'mx-auto' : '')}>
-      <div className="overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <header className="bg-slate-950 px-8 py-10 text-white">
-          {personalInfoItem && personalInfoItem.type === 'personal_info' ? (
-            (() => {
-              const data = personalInfoItem.data;
-              return (
-                <div className="space-y-4">
-                  {data.fullName ? <h1 className="font-serif text-5xl font-semibold tracking-tight">{data.fullName}</h1> : null}
-                  {data.jobTitle ? <p className="text-base uppercase tracking-[0.2em] text-slate-300">{data.jobTitle}</p> : null}
-                </div>
-              );
-            })()
-          ) : null}
-        </header>
+    <div 
+      className={cn('w-full text-zinc-950 antialiased', getScaleClass(scale), isPreview ? 'mx-auto' : '')}
+      style={{
+        ...customStyles,
+        height: 'auto',
+        minHeight: '0px',
+        display: 'block',
+        fontFamily: 'var(--font-family, Inter, sans-serif)',
+        backgroundColor: 'var(--background-color, #ffffff)',
+        fontSize: 'var(--font-size, 16px)',
+      }}
+    >
+      <header className="bg-slate-950 px-8 py-12 text-white shadow-lg" style={{ display: 'block' }}>
+        {personalInfoItem?.type === 'personal_info' && (
+          <div style={{ display: 'block' }}>
+            {(() => {
+               const data = personalInfoItem.data as PersonalInfoData;
+               return (
+                <>
+                  <h1 className="font-black uppercase tracking-tighter" style={{ fontSize: '3.5em', lineHeight: '1' }}>
+                    {data.fullName}
+                  </h1>
+                  <p className="font-medium uppercase tracking-[0.4em] text-slate-400 mt-2" style={{ fontSize: '1.2em' }}>
+                    {data.jobTitle}
+                  </p>
+                </>
+               );
+            })()}
+          </div>
+        )}
+      </header>
 
-        <div className="grid grid-cols-1 gap-0 lg:grid-cols-[35%_65%]">
-          <aside className="space-y-8 bg-slate-50 px-8 py-10">
-            {personalInfoItem && personalInfoItem.type === 'personal_info' ? (
-              (() => {
-                const data = personalInfoItem.data;
-                return (
-                  <section className="space-y-3 border-b border-slate-200 pb-6">
-                    {data.email ? <p className="text-sm text-slate-700">{data.email}</p> : null}
-                    {data.phone ? <p className="text-sm text-slate-700">{data.phone}</p> : null}
-                    {data.location ? <p className="text-sm text-slate-700">{data.location}</p> : null}
-                    {data.website ? <p className="text-sm text-slate-700">{data.website}</p> : null}
-                    {data.linkedin ? <p className="text-sm text-slate-700">{data.linkedin}</p> : null}
-                    {data.github ? <p className="text-sm text-slate-700">{data.github}</p> : null}
-                    {data.summary ? <p className="pt-2 text-sm leading-6 text-slate-700">{data.summary}</p> : null}
-                  </section>
-                );
-              })()
-            ) : null}
+      <div style={{ display: 'block', clear: 'both', minHeight: '0px' }}>
+        <aside style={{ 
+            width: '35%', 
+            float: 'left', 
+            borderRight: '1px solid #f1f5f9',
+            backgroundColor: '#f8fafc',
+            padding: '40px 32px',
+            minHeight: '1123px'
+        }}>
+          {leftSections.map(renderSection)}
+        </aside>
 
-            {leftSections.map((section) => renderCardSection(section))}
-          </aside>
-
-          <main className="space-y-8 px-8 py-10">
-            {rightSections.map((section) => renderCardSection(section))}
-          </main>
-        </div>
+        <main style={{ 
+            width: '65%', 
+            float: 'left', 
+            padding: '40px 32px',
+            minHeight: '1123px'
+        }}>
+          {rightSections.map(renderSection)}
+        </main>
+        <div style={{ clear: 'both' }} />
       </div>
     </div>
   );

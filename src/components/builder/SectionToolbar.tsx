@@ -9,8 +9,10 @@ import {
   GraduationCap,
   GripVertical,
   Languages,
+  Paintbrush,
   PenTool,
   Sparkles,
+  Trophy,
   User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,6 +29,7 @@ const sectionTypeIcons: Record<SectionType, typeof User> = {
   projects: FolderKanban,
   certifications: BadgeCheck,
   languages: Languages,
+  key_achievements: Trophy,
   custom: PenTool,
 };
 
@@ -56,6 +59,26 @@ export default function SectionToolbar() {
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto px-1 py-2">
+        <button
+          type="button"
+          onClick={() => setActiveSection('design')}
+          className={cn(
+            'group relative flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all',
+            activeSection === 'design'
+              ? 'border-emerald-300 bg-emerald-50 shadow-[inset_4px_0_0_0_rgb(5,150,105)] shadow-sm'
+              : 'border-zinc-200 bg-white hover:border-emerald-200 hover:bg-emerald-50'
+          )}
+        >
+          <Paintbrush className={cn('h-5 w-5 shrink-0', activeSection === 'design' ? 'text-emerald-600' : 'text-zinc-500')} />
+          <div className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-bold text-zinc-900">
+              Design & Settings
+            </span>
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Appearance</span>
+          </div>
+        </button>
+
+        <div className="h-px bg-zinc-100 my-2" />
         {sections.map((section, index) => {
           const Icon = sectionTypeIcons[section.type];
           const isActive = activeSection === section.id;
@@ -107,7 +130,7 @@ export default function SectionToolbar() {
       <div className="mt-4 space-y-2 border-t border-zinc-200 pt-4">
         <Button
           type="button"
-          className="w-full bg-emerald-600 hover:bg-emerald-700"
+          className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
           onClick={() => setIsAddSectionModalOpen(true)}
         >
           + Add Section

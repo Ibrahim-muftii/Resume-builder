@@ -17,6 +17,7 @@ import {
   Languages,
   PenTool,
   Sparkles,
+  Trophy,
   Trash2,
   User,
 } from 'lucide-react';
@@ -47,6 +48,7 @@ const sectionTypeIcons: Record<SectionType, typeof User> = {
   projects: FolderKanban,
   certifications: BadgeCheck,
   languages: Languages,
+  key_achievements: Trophy,
   custom: PenTool,
 };
 

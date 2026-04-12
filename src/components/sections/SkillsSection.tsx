@@ -37,8 +37,8 @@ export default function SkillsSection({ item, onSave, onCancel }: SectionFormPro
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SkillSchemaType>({
-    resolver: zodResolver(skillSchema),
-    defaultValues: defaults,
+    resolver: zodResolver(skillSchema) as any,
+    defaultValues: defaults as any,
   });
 
   const submit = async (data: SkillSchemaType): Promise<void> => {

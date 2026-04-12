@@ -12,6 +12,7 @@ import ProjectsSection from '@/components/sections/ProjectsSection';
 import CertificationsSection from '@/components/sections/CertificationsSection';
 import LanguagesSection from '@/components/sections/LanguagesSection';
 import CustomSection from '@/components/sections/CustomSection';
+import KeyAchievementsSection from '@/components/sections/KeyAchievementsSection';
 import { useResumeStore } from '../../../lib/stores/resumeStore';
 import { getDefaultSectionItem, SECTION_TYPE_META } from '../../../lib/utils/sectionDefaults';
 import type { ResumeSection, SectionItem, SectionItemData, SectionType } from '../../../lib/types/resume';
@@ -26,6 +27,7 @@ const getFormComponent = (sectionType: SectionType) => {
     case 'projects': return ProjectsSection;
     case 'certifications': return CertificationsSection;
     case 'languages': return LanguagesSection;
+    case 'key_achievements': return KeyAchievementsSection;
     default: return CustomSection;
   }
 };
@@ -60,14 +62,20 @@ export default function FieldEditor() {
   const handleSave = (data: SectionItemData): void => {
     if (!section || !selectedItem) return;
 
-    const updatedItem: SectionItem = {
+    const updatedItem = {
       ...selectedItem,
-      data: data as SectionItem['data'],
+      data,
       updatedAt: new Date().toISOString(),
-    };
+    } as SectionItem;
 
     updateItem(section.id, updatedItem);
     setDirty(true);
+
+    // For repeatable sections (Experience, Skills...), go back to the item list
+    // For non-repeatable sections (Personal Info), stay in context
+    if (SECTION_TYPE_META[section.type].isRepeatable) {
+      setActiveItem(null);
+    }
   };
 
   const handleAddItem = (): void => {
@@ -75,16 +83,16 @@ export default function FieldEditor() {
 
     const newItemId = crypto.randomUUID();
     const now = new Date().toISOString();
-    const newItem: SectionItem = {
+    const newItem = {
       id: newItemId,
       sectionId: section.id,
       resumeId: resume.id,
       sortOrder: section.items.length,
       type: section.type,
-      data: getDefaultSectionItem(section.type) as SectionItem['data'],
+      data: getDefaultSectionItem(section.type),
       createdAt: now,
       updatedAt: now,
-    };
+    } as SectionItem;
 
     addItem(section.id, newItem);
     setActiveItem(newItemId);
@@ -100,6 +108,7 @@ export default function FieldEditor() {
       case 'projects': return data.name || 'Untitled Project';
       case 'certifications': return data.name || 'Untitled Certification';
       case 'languages': return data.name || 'Untitled Language';
+      case 'key_achievements': return data.title || 'Untitled Achievement';
       case 'custom': return data.title || 'Untitled Custom Section';
       default: return 'Untitled Item';
     }
@@ -164,7 +173,7 @@ export default function FieldEditor() {
             {isRepeatable && (
               <Button 
                 onClick={handleAddItem} 
-                className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 font-bold shadow-lg shadow-emerald-100 transition-all hover:scale-[1.01] flex gap-2"
+                className="w-full h-11 bg-emerald-600 text-white hover:bg-emerald-700 font-bold shadow-lg shadow-emerald-100 transition-all hover:scale-[1.01] flex gap-2"
               >
                 <Plus className="h-4 w-4" />
                 Add New {section.title.replace(/s$/, '')}
