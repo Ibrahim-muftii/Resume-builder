@@ -143,6 +143,7 @@ export const resumeSettingsSchema = z.object({
   fontFamily: z.string().default('Inter'),
   primaryColor: z.string().default('#000000'),
   backgroundColor: z.string().default('#ffffff'),
+  sidebarWidth: z.number().optional().default(40),
 });
 
 export const sectionItemDataSchema = z.discriminatedUnion('type', [

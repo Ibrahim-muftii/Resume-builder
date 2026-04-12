@@ -113,6 +113,7 @@ export type ResumeSettings = {
   fontFamily: string;
   primaryColor: string;
   backgroundColor: string;
+  sidebarWidth?: number;
 };
 
 export type SectionItemData =

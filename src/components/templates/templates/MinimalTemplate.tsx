@@ -37,7 +37,7 @@ const renderSection = (section: ResumeSection) => {
                     {data.startDate} {data.endDate ? `— ${data.endDate}` : data.isCurrent ? '— Present' : ''}
                   </div>
                 </div>
-                {hasText(data.company) ? <p className="font-semibold" style={{ color: 'var(--primary-color, #059669)', fontSize: '0.9em' }}>{data.company}</p> : null}
+                {hasText(data.company) ? <p className="font-semibold text-slate-600" style={{ fontSize: '0.9em' }}>{data.company}</p> : null}
                 {data.descriptionBullets && data.descriptionBullets.length > 0 && (
                   <ul className="mt-2 space-y-1.5 text-slate-600" style={{ fontSize: '0.85em' }}>
                     {data.descriptionBullets.map((b, i) => (

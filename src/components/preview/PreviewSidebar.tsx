@@ -1,7 +1,24 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronRight, Layout, Type, Palette, ChevronLeft } from 'lucide-react';
+import { ChevronRight, Layout, Type, Palette, ChevronLeft, GripVertical } from 'lucide-react';
+import { 
+  DndContext, 
+  closestCenter, 
+  KeyboardSensor, 
+  PointerSensor, 
+  useSensor, 
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import { 
+  SortableContext, 
+  sortableKeyboardCoordinates, 
+  verticalListSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { arrayMove } from '@dnd-kit/sortable';
 import { useResumeStore } from '../../../lib/stores/resumeStore';
 import { cn } from '@/lib/utils';
 import { SectionIcon } from '../templates/templates/SectionIcon';
@@ -32,10 +49,60 @@ const getFormComponent = (sectionType: SectionType) => {
   }
 };
 
+const SortableItem = ({ id, label, onClick }: { id: string; label: string; onClick: () => void }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50/50",
+        isDragging && "shadow-lg border-emerald-300 ring-2 ring-emerald-500/10"
+      )}
+    >
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 text-slate-300 hover:text-emerald-500">
+        <GripVertical className="h-4 w-4" />
+      </div>
+      <button 
+        onClick={onClick}
+        className="flex-1 text-left px-2 overflow-hidden"
+      >
+        <span className="text-sm font-semibold text-slate-700 truncate block">
+          {label}
+        </span>
+      </button>
+      <ChevronRight className="h-4 w-4 text-zinc-300 shrink-0" />
+    </div>
+  );
+};
+
 export function PreviewSidebar() {
   const resume = useResumeStore((state) => state.resume);
   const updateItem = useResumeStore((state) => state.updateItem);
+  const reorderItems = useResumeStore((state) => state.reorderItems);
   const setDirty = useResumeStore((state) => state.setDirty);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
   
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -59,8 +126,15 @@ export function PreviewSidebar() {
     if (!editingSectionId || !activeItem) return;
     updateItem(editingSectionId, { ...activeItem, data });
     setDirty(true);
-    if (SECTION_TYPE_META[activeSection!.type].isRepeatable) {
-        setEditingItemId(null);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id && activeSection) {
+      const oldIndex = activeSection.items.findIndex(i => i.id === active.id);
+      const newIndex = activeSection.items.findIndex(i => i.id === over.id);
+      const newItems = arrayMove(activeSection.items, oldIndex, newIndex);
+      reorderItems(activeSection.id, newItems);
     }
   };
 
@@ -95,20 +169,27 @@ export function PreviewSidebar() {
                     </div>
 
                     {SECTION_TYPE_META[activeSection.type].isRepeatable && !editingItemId ? (
-                        <div className="space-y-2">
-                            {activeSection.items.map(item => (
-                                <button 
-                                    key={item.id}
-                                    onClick={() => setEditingItemId(item.id)}
-                                    className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50/50"
-                                >
-                                    <span className="text-sm font-semibold text-slate-700 truncate">
-                                        {(item.data as any).name || (item.data as any).company || (item.data as any).title || 'Untitled Item'}
-                                    </span>
-                                    <ChevronRight className="h-4 w-4 text-zinc-300" />
-                                </button>
-                            ))}
-                        </div>
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <SortableContext
+                            items={activeSection.items.map(i => i.id)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <div className="space-y-2">
+                                {activeSection.items.map(item => (
+                                    <SortableItem
+                                      key={item.id}
+                                      id={item.id}
+                                      label={(item.data as any).name || (item.data as any).company || (item.data as any).title || 'Untitled Item'}
+                                      onClick={() => setEditingItemId(item.id)}
+                                    />
+                                ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
                     ) : (
                         activeItem && (
                             <div className="rounded-2xl border border-zinc-200 bg-white p-4">

@@ -209,8 +209,8 @@ export default function BuilderPageClient({ initialResume }: BuilderPageClientPr
               type="button"
               onClick={() => setPanelTab(tab.id)}
               className={`rounded-lg px-3 py-2 text-sm font-bold tracking-tight transition-all ${panelTab === tab.id
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'bg-slate-100 text-slate-500'
+                ? 'bg-slate-900 text-white shadow-md'
+                : 'bg-slate-100 text-slate-500'
                 }`}
             >
               {tab.label}

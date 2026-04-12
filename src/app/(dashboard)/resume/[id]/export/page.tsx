@@ -25,7 +25,7 @@ const mapResume = (resumeRow: any, sections: any[], items: any[]): Resume => {
   const mappedSections = sections.map((section) => {
     const sectionItems = itemsBySectionId.get(section.id) ?? [];
     const isKeyAchievements = section.type === 'custom' && (
-      section.title === 'Key Achievements' || 
+      section.title === 'Key Achievements' ||
       sectionItems.some(item => (item.data as any)?.type === 'key_achievements')
     );
     const effectiveType = isKeyAchievements ? 'key_achievements' : section.type;
@@ -98,7 +98,7 @@ const fetchResumeById = async (id: string): Promise<Resume | null> => {
     .eq('resume_id', id).order('sort_order', { ascending: true });
 
   if (sectionsResult.error) {
-     sectionsResult = await supabase.from('resume_sections').select('*').eq('resume_id', id).order('position', { ascending: true });
+    sectionsResult = await supabase.from('resume_sections').select('*').eq('resume_id', id).order('position', { ascending: true });
   }
 
   if (sectionsResult.error) return null;
@@ -109,7 +109,7 @@ const fetchResumeById = async (id: string): Promise<Resume | null> => {
 
   let itemsResult = await supabase.from('section_items').select('*').in('section_id', sectionIds).order('sort_order', { ascending: true });
   if (itemsResult.error) {
-     itemsResult = await supabase.from('section_items').select('*').in('section_id', sectionIds).order('position', { ascending: true });
+    itemsResult = await supabase.from('section_items').select('*').in('section_id', sectionIds).order('position', { ascending: true });
   }
 
   return mapResume(resumeRow, sectionRows, itemsResult.data ?? []);
@@ -134,50 +134,40 @@ export default async function ResumeExportPage({ params }: ExportPageProps) {
 
   return (
     <div className="bg-white min-h-screen">
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700;800;900&display=swap');
+
         @page { 
           size: 794px 1123px;
-          margin: 20px 0;
+          margin: 20px !important;
         }
         body { 
           margin: 0; 
           padding: 0; 
-          -webkit-print-color-adjust: exact; 
+          -webkit-print-color-adjust: exact !important; 
+          print-color-adjust: exact !important;
           background-color: white;
         }
         .printable-page {
-          width: 794px;
+          width: 752px;
           margin: 0 auto;
+          background-color: white;
         }
-        * { print-color-adjust: exact; }
+        * { 
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important; 
+        }
 
         /* ===== CRITICAL: Prevent ANY item from splitting across pages ===== */
-        /* Target items by the data attribute */
         [data-resume-item] {
           break-inside: avoid !important;
           page-break-inside: avoid !important;
         }
-        /* Target ALL direct children of space-y containers (experience/education/project items) */
-        .space-y-0 > div,
-        .space-y-1 > div,
-        .space-y-2 > div,
-        .space-y-3 > div,
-        .space-y-4 > div,
-        .space-y-5 > div,
-        .space-y-6 > div {
-          break-inside: avoid !important;
-          page-break-inside: avoid !important;
-        }
-        /* Target article elements (used in some templates) */
+        
         article {
           break-inside: avoid !important;
           page-break-inside: avoid !important;
-        }
-        /* Keep section headings with at least one item below them */
-        section > h2,
-        section > div:first-of-type {
-          break-after: avoid !important;
-          page-break-after: avoid !important;
         }
       `}} />
       <div className="printable-page">

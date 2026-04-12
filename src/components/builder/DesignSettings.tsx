@@ -14,6 +14,10 @@ const FONT_OPTIONS = [
   { label: 'Playfair Display', value: 'Playfair Display' },
   { label: 'Outfit', value: 'Outfit' },
   { label: 'Open Sans', value: 'Open Sans' },
+  { label: 'Montserrat', value: 'Montserrat' },
+  { label: 'Lato', value: 'Lato' },
+  { label: 'Raleway', value: 'Raleway' },
+  { label: 'Poppins', value: 'Poppins' },
 ];
 
 const FONT_SIZE_OPTIONS = [

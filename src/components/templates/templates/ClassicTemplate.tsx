@@ -28,7 +28,7 @@ const renderSection = (section: ResumeSection) => {
             }
 
             return (
-              <article key={item.id} className="space-y-1">
+              <article key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
                 {hasText(data.position) ? <h3 className="font-semibold">{data.position}</h3> : null}
                 {hasText(data.company) ? <p>{data.company}</p> : null}
                 {hasText(data.location) ? <p>{data.location}</p> : null}
@@ -55,7 +55,7 @@ const renderSection = (section: ResumeSection) => {
             }
 
             return (
-              <article key={item.id} className="space-y-1">
+              <article key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
                 {hasText(data.degree) ? <h3 className="font-semibold">{data.degree}</h3> : null}
                 {hasText(data.field) ? <p>{data.field}</p> : null}
                 {hasText(data.institution) ? <p>{data.institution}</p> : null}
@@ -70,7 +70,7 @@ const renderSection = (section: ResumeSection) => {
             }
 
             return (
-              <article key={item.id} className="space-y-1">
+              <article key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
                 <h3 className="font-semibold">{data.name}</h3>
                 {hasText(data.category) ? <p>{data.category}</p> : null}
               </article>
@@ -84,7 +84,7 @@ const renderSection = (section: ResumeSection) => {
             }
 
             return (
-              <article key={item.id} className="space-y-1">
+              <article key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
                 {hasText(data.name) ? <h3 className="font-semibold">{data.name}</h3> : null}
                 {hasText(data.descriptionTitle) ? <p>{data.descriptionTitle}</p> : null}
                 {data.descriptionBullets && data.descriptionBullets.length > 0 ? (
@@ -105,7 +105,7 @@ const renderSection = (section: ResumeSection) => {
             }
 
             return (
-              <article key={item.id} className="space-y-1">
+              <article key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
                 {hasText(data.name) ? <h3 className="font-semibold">{data.name}</h3> : null}
                 {hasText(data.issuer) ? <p>{data.issuer}</p> : null}
               </article>
@@ -119,7 +119,7 @@ const renderSection = (section: ResumeSection) => {
             }
 
             return (
-              <article key={item.id} className="space-y-1">
+              <article key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
                 <h3 className="font-semibold">{data.name}</h3>
                 <p>{data.proficiency}</p>
               </article>
@@ -133,7 +133,7 @@ const renderSection = (section: ResumeSection) => {
             }
 
             return (
-              <article key={item.id} className="space-y-1">
+              <article key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
                 {hasText(data.title) ? <h3 className="font-semibold">{data.title}</h3> : null}
                 {hasText(data.description) ? <p>{data.description}</p> : null}
               </article>
@@ -147,7 +147,7 @@ const renderSection = (section: ResumeSection) => {
             }
 
             return (
-              <article key={item.id} className="space-y-1">
+              <article key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
                 {hasText(data.title) ? <h3 className="font-semibold">{data.title}</h3> : null}
                 {hasText(data.content) ? <p>{data.content}</p> : null}
               </article>
@@ -173,11 +173,16 @@ export default function ClassicTemplate({ resume, isPreview, scale }: TemplatePr
 
   return (
     <div
-      className={cn('w-full min-h-[1100px] bg-white text-black', getScaleClass(scale), isPreview ? 'mx-auto' : '')}
+      className={cn(
+        'w-full min-h-[1100px] antialiased transition-all duration-300',
+        getScaleClass(scale),
+        isPreview ? 'mx-auto' : ''
+      )}
       style={{
         ...customStyles,
         fontFamily: 'var(--font-family, serif)',
         backgroundColor: 'var(--background-color, white)',
+        color: 'var(--text-color, black)',
         fontSize: 'var(--font-size, 16px)',
       }}
     >

@@ -30,7 +30,7 @@ const renderPersonalInfo = (section?: ResumeSection) => {
       <div style={{ marginBottom: '16px' }}>
         {hasText(data.fullName) && <h1 style={{ fontWeight: 'bold', fontSize: '2.4em', lineHeight: '1.2' }}>{data.fullName}</h1>}
         {hasText(data.jobTitle) && (
-          <p style={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.25em', color: 'var(--primary-color, #6ee7b7)', fontSize: '0.9em', marginTop: '8px' }}>
+          <p style={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.25em', color: '#94a3b8', fontSize: '0.9em', marginTop: '8px' }}>
             {data.jobTitle}
           </p>
         )}
@@ -47,7 +47,7 @@ const renderSection = (section: ResumeSection, isSidebar = false) => {
     <div key={section.id} style={{ display: 'block', marginBottom: '40px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
         <SectionIcon type={section.type} className="h-5 w-5" style={{ color: 'var(--primary-color, #6ee7b7)' }} />
-        <h2 style={{ fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.3em', fontSize: '0.75em', color: isSidebar ? 'var(--primary-color, #6ee7b7)' : 'var(--primary-color, #134e4a)' }}>
+        <h2 style={{ fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.3em', fontSize: '0.75em', color: isSidebar ? 'var(--primary-color, #6ee7b7)' : '#0f172a' }}>
           {section.title}
         </h2>
       </div>
@@ -61,7 +61,7 @@ const renderSection = (section: ResumeSection, isSidebar = false) => {
                   <h3 style={{ fontWeight: 'bold', color: '#0f172a', fontSize: '1.1em' }}>{data.position}</h3>
                   <span style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: '0.75em' }}>{data.startDate} - {data.endDate}</span>
                 </div>
-                <p style={{ fontWeight: 600, color: 'var(--primary-color, #0d9488)', fontSize: '0.9em', marginBottom: '8px' }}>{data.company}</p>
+                <p style={{ fontWeight: 600, color: '#475569', fontSize: '0.9em', marginBottom: '8px' }}>{data.company}</p>
                 {data.descriptionBullets && data.descriptionBullets.length > 0 && (
                   <ul style={{ paddingLeft: '0px', fontSize: '0.85em', opacity: 0.8 }}>
                     {data.descriptionBullets.map((b, i) => <li key={i} style={{ marginBottom: '6px', listStyleType: 'none' }}>• {b}</li>)}
@@ -78,7 +78,7 @@ const renderSection = (section: ResumeSection, isSidebar = false) => {
                   <h3 style={{ fontWeight: 'bold', color: '#0f172a', fontSize: '1em' }}>{data.degree}</h3>
                   <span style={{ color: '#94a3b8', fontSize: '0.75em' }}>{data.startDate} - {data.endDate}</span>
                 </div>
-                <p style={{ color: 'var(--primary-color, #0d9488)', fontSize: '0.85em' }}>{data.institution}</p>
+                <p style={{ color: '#475569', fontSize: '0.85em' }}>{data.institution}</p>
               </div>
             );
           }
@@ -91,7 +91,7 @@ const renderSection = (section: ResumeSection, isSidebar = false) => {
                   <span style={{ opacity: 0.6 }}>{data.level}</span>
                 </div>
                 <div style={{ height: '4px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
-                  <div style={{ height: '100%', width: data.level === 'expert' ? '100%' : data.level === 'advanced' ? '75%' : data.level === 'intermediate' ? '50%' : '25%', backgroundColor: 'var(--primary-color, #6ee7b7)', borderRadius: '2px' }} />
+                  <div style={{ height: '100%', width: data.level === 'expert' ? '100%' : data.level === 'advanced' ? '75%' : data.level === 'intermediate' ? '50%' : '25%', backgroundColor: '#64748b', borderRadius: '2px' }} />
                 </div>
               </div>
             );
@@ -187,7 +187,7 @@ export default function ModernTemplate({ resume, isPreview, scale }: TemplatePro
         <main style={{ 
             width: '70%', 
             float: 'left', 
-            backgroundColor: 'white', 
+            backgroundColor: 'var(--background-color, white)', 
             padding: '40px 40px',
             minHeight: '1123px'
         }}>

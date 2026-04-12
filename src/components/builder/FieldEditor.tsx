@@ -54,7 +54,7 @@ export default function FieldEditor() {
     }
     // For non-repeatable sections, always show the first item
     if (!SECTION_TYPE_META[section.type].isRepeatable) {
-        return section.items[0] ?? null;
+      return section.items[0] ?? null;
     }
     return null; // Return null to show the list for repeatable sections
   }, [section, activeItemId]);
@@ -135,9 +135,9 @@ export default function FieldEditor() {
           </p>
         </div>
         {selectedItem && isRepeatable && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setActiveItem(null)}
             className="text-xs font-bold text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
           >
@@ -171,8 +171,8 @@ export default function FieldEditor() {
             className="space-y-4"
           >
             {isRepeatable && (
-              <Button 
-                onClick={handleAddItem} 
+              <Button
+                onClick={handleAddItem}
                 className="w-full h-11 bg-emerald-600 text-white hover:bg-emerald-700 font-bold shadow-lg shadow-emerald-100 transition-all hover:scale-[1.01] flex gap-2"
               >
                 <Plus className="h-4 w-4" />
@@ -207,7 +207,7 @@ export default function FieldEditor() {
                       </div>
                       <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-emerald-500" />
                     </button>
-                    
+
                     <button
                       type="button"
                       onClick={() => removeItem(section.id, item.id)}

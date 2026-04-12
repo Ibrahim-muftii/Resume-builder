@@ -9,17 +9,17 @@ import {
   AtSign,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import type { 
-  ResumeSection, 
-  PersonalInfoData, 
-  ExperienceData, 
-  EducationData, 
-  SkillData, 
-  ProjectData, 
-  CertificationData, 
-  LanguageData, 
-  KeyAchievementData, 
-  CustomData 
+import type {
+  ResumeSection,
+  PersonalInfoData,
+  ExperienceData,
+  EducationData,
+  SkillData,
+  ProjectData,
+  CertificationData,
+  LanguageData,
+  KeyAchievementData,
+  CustomData
 } from '../../../../lib/types/resume';
 import { getScaleClass, getTemplateStyles, getVisibleSections, hasSectionContent, type TemplateProps } from './templateShared';
 
@@ -39,10 +39,7 @@ const SectionHeading = ({ children, sectionType }: { children: React.ReactNode; 
 /* ─── Bullet item ─── */
 const BulletItem = ({ text, itemKey }: { text: string; itemKey: string }) => (
   <li key={itemKey} className="flex gap-[7px] items-start leading-[1.55]">
-    <span
-      className="mt-[6px] h-[4px] w-[4px] shrink-0 rounded-full"
-      style={{ backgroundColor: 'var(--primary-color, black)' }}
-    />
+    <span className="mt-[6px] h-[4px] w-[4px] shrink-0 rounded-full bg-zinc-400" />
     <span>{text}</span>
   </li>
 );
@@ -171,8 +168,7 @@ const renderSkills = (section: ResumeSection) => {
           return (
             <div
               key={item.id}
-              className="px-[8px] py-[1px] border text-[10px] font-bold bg-white"
-              style={{ borderColor: 'var(--primary-color, #18181b)', color: 'var(--primary-color, black)' }}
+              className="px-[8px] py-[1px] border border-zinc-200 text-[0.625em] font-bold bg-zinc-50 text-zinc-700"
             >
               {d.name}
             </div>
@@ -204,6 +200,7 @@ const renderExperience = (section: ResumeSection) => {
                 'pb-[10px]',
                 !isLast && 'mb-[10px] border-b border-dotted border-zinc-300'
               )}
+              style={{ breakInside: 'avoid' }}
             >
               {hasText(d.position) ? (
                 <h3 className="text-[13px] font-bold text-black leading-snug">{d.position}</h3>
@@ -259,6 +256,7 @@ const renderEducation = (section: ResumeSection) => {
                 'pb-[8px]',
                 !isLast && 'mb-[8px] border-b border-dotted border-zinc-300'
               )}
+              style={{ breakInside: 'avoid' }}
             >
               {hasText(degreeLine) ? (
                 <h3 className="text-[13px] font-bold text-black leading-snug">{degreeLine}</h3>
@@ -301,6 +299,7 @@ const renderProjects = (section: ResumeSection) => {
                 'pb-[10px]',
                 !isLast && 'mb-[10px] border-b border-dotted border-zinc-300'
               )}
+              style={{ breakInside: 'avoid' }}
             >
               {hasText(d.name) ? (
                 <h3 className="text-[13px] font-bold text-black leading-snug">{d.name}</h3>
@@ -337,7 +336,7 @@ const renderCustom = (section: ResumeSection) => {
           if (item.type !== 'custom') return null;
           const d = item.data as CustomData;
           return (
-            <div key={item.id}>
+            <div key={item.id} style={{ breakInside: 'avoid' }}>
               {hasText(d.title) ? (
                 <h3 className="text-[11.5px] font-bold text-black leading-tight">{d.title}</h3>
               ) : null}
@@ -366,7 +365,7 @@ const renderKeyAchievements = (section: ResumeSection) => {
           if (item.type !== 'key_achievements') return null;
           const d = item.data as KeyAchievementData;
           return (
-            <div key={item.id} className="space-y-1">
+            <div key={item.id} className="space-y-1" style={{ breakInside: 'avoid' }}>
               {hasText(d.title) ? (
                 <h3 className="text-[12px] font-bold text-black leading-snug">{d.title}</h3>
               ) : null}
@@ -395,7 +394,7 @@ const renderCertifications = (section: ResumeSection) => {
           if (item.type !== 'certifications') return null;
           const d = item.data as CertificationData;
           return (
-            <div key={item.id}>
+            <div key={item.id} style={{ breakInside: 'avoid' }}>
               {hasText(d.name) ? <h3 className="text-[12px] font-bold text-black">{d.name}</h3> : null}
               {hasText(d.issuer) ? <p className="text-[10px] text-zinc-600">{d.issuer}</p> : null}
             </div>
@@ -418,7 +417,7 @@ const renderLanguages = (section: ResumeSection) => {
           if (item.type !== 'languages') return null;
           const d = item.data as LanguageData;
           return (
-            <div key={item.id} className="text-[10.5px] text-zinc-800">
+            <div key={item.id} className="text-[10.5px] text-zinc-800" style={{ breakInside: 'avoid' }}>
               <span className="font-bold">{d.name}</span>
               <span className="text-zinc-500 ml-1">({d.proficiency})</span>
             </div>
@@ -456,17 +455,18 @@ export default function ProfessionalTemplate({ resume, isPreview, scale }: Templ
 
   return (
     <div
+      id="resume-container"
       className={cn(
-        'w-full min-h-[1100px] text-black font-sans antialiased transition-all duration-300',
+        'w-full min-h-[1100px] antialiased transition-all duration-300',
         'py-[40px] px-[44px]',
         getScaleClass(scale),
         isPreview ? 'mx-auto' : ''
       )}
       style={{
         ...customStyles,
-        fontFamily: 'var(--font-family, Inter, sans-serif)',
-        backgroundColor: 'var(--background-color, white)',
-        fontSize: 'var(--font-size, 16px)',
+        fontFamily: `'${resume.settings?.fontFamily || 'Inter'}', sans-serif`,
+        backgroundColor: resume.settings?.backgroundColor || 'white',
+        fontSize: customStyles['--font-size'] as string || '16px',
       }}
     >
       <div className="max-w-[720px] mx-auto space-y-[16px]">

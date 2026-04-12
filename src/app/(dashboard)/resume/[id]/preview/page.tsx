@@ -14,6 +14,9 @@ import { DownloadButton } from '@/components/pdf/ResumePDF';
 import { PreviewSidebar } from '@/components/preview/PreviewSidebar';
 import { PreviewPaginator } from '@/components/preview/PreviewPaginator';
 import { ResumeStoreInitializer } from '@/components/preview/ResumeStoreInitializer';
+import { LivePreviewContent } from '@/components/preview/LivePreviewContent';
+import { PreviewPageClient } from '@/components/preview/PreviewPageClient';
+import { FontLoader } from '@/components/templates/FontLoader';
 import { sectionItemDataSchema } from '../../../../../../lib/validations/resumeSchema';
 import { getDefaultSectionItem } from '../../../../../../lib/utils/sectionDefaults';
 import type {
@@ -93,9 +96,11 @@ const mapResume = (resumeRow: ResumeRow, sections: ResumeSectionRow[], items: Se
     const effectiveType = isKeyAchievements ? 'key_achievements' : section.type;
 
     const mappedItems = sectionItems.map((item) => {
-      const dataToParse = { ...(item.data as any), type: effectiveType };
+      // Ensure we preserve the original data as much as possible, including name/title
+      const originalData = typeof item.data === 'string' ? JSON.parse(item.data) : item.data;
+      const dataToParse = { ...originalData, type: effectiveType };
       const parsedData = sectionItemDataSchema.safeParse(dataToParse);
-      const itemData = parsedData.success ? parsedData.data : getDefaultSectionItem(effectiveType);
+      const itemData = parsedData.success ? parsedData.data : { ...getDefaultSectionItem(effectiveType), ...originalData };
 
       return {
         id: item.id,
@@ -138,7 +143,7 @@ const mapResume = (resumeRow: ResumeRow, sections: ResumeSectionRow[], items: Se
       primaryColor: '#000000',
       backgroundColor: '#ffffff',
     },
-    sections: mappedSections,
+    sections: mappedSections.sort((a, b) => a.sortOrder - b.sortOrder),
     createdAt: resumeRow.created_at,
     updatedAt: resumeRow.updated_at,
     isPublic: resumeRow.is_public,
@@ -203,55 +208,7 @@ export default async function ResumePreviewPage({ params }: PreviewPageProps) {
   const { id } = await params;
   const resume = await fetchResumeById(id);
   if (!resume) notFound();
-  const publicLink = `${await getBaseUrl()}/resume/${resume.id}/public`;
-
   return (
-    <div className="flex h-screen flex-col bg-[#f1f5f9] text-slate-900 overflow-hidden">
-      <ResumeStoreInitializer resume={resume} />
-      <header className="z-30 border-b border-zinc-200 bg-white px-6 py-3 shadow-sm">
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href={`/resume/${resume.id}`} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">
-              <ChevronLeft className="h-4 w-4" />
-              Back to Editor
-            </Link>
-            <div className="h-4 w-[1px] bg-zinc-200" />
-            <h1 className="text-sm font-black uppercase tracking-widest text-slate-900 leading-none">{resume.title}</h1>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <form action={toggleShareAction}>
-              <button type="submit" className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-zinc-50 hover:shadow-sm">
-                <Share2 className="h-3 w-3 text-emerald-600" />
-                {resume.isPublic ? 'Stop Sharing' : 'Share Link'}
-              </button>
-              <input type="hidden" name="resumeId" value={resume.id} />
-              <input type="hidden" name="nextPublic" value={String(!resume.isPublic)} />
-            </form>
-            <DownloadButton resume={resume} templateId={resume.templateId} />
-          </div>
-        </div>
-      </header>
-
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-[360px] flex-shrink-0 border-r border-zinc-200 bg-white z-20 shadow-lg">
-          <PreviewSidebar />
-        </div>
-        
-        <main className="flex-1 overflow-y-auto bg-slate-200/60 p-12 custom-scrollbar flex flex-col items-center">
-          <div className="relative">
-              <PreviewPaginator>
-                  {renderTemplate(resume, resume.templateId)}
-              </PreviewPaginator>
-          </div>
-          
-          {resume.isPublic && (
-            <div className="mt-8 rounded-2xl border border-emerald-100 bg-white p-4 text-center shadow-lg w-full max-w-xl">
-              <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-widest">Public Link: <span className="underline select-all">{publicLink}</span></p>
-            </div>
-          )}
-        </main>
-      </div>
-    </div>
+    <PreviewPageClient initialResume={resume} />
   );
 }

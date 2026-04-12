@@ -71,12 +71,24 @@ export const getTemplateStyles = (resume: Resume) => {
   };
 
   return {
-    '--font-family': settings.fontFamily,
+    '--font-family': `'${settings.fontFamily}', sans-serif`,
     '--font-size': fontSizeMap[settings.fontSize] || '1rem',
     '--primary-color': settings.primaryColor,
     '--background-color': settings.backgroundColor,
   } as React.CSSProperties;
 };
+
+export const FONT_LIST = [
+  'Inter',
+  'Roboto',
+  'Playfair Display',
+  'Outfit',
+  'Open Sans',
+  'Montserrat',
+  'Lato',
+  'Raleway',
+  'Poppins'
+];
 
 export const sectionTypes = {
   personalInfo: 'personal_info' as SectionType,
