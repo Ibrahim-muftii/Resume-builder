@@ -6,8 +6,7 @@ import { ChevronLeft, Share2 } from 'lucide-react';
 import { FontLoader } from '@/components/templates/FontLoader';
 import { ResumeStoreInitializer } from '@/components/preview/ResumeStoreInitializer';
 import { PreviewSidebar } from '@/components/preview/PreviewSidebar';
-import { PreviewPaginator } from '@/components/preview/PreviewPaginator';
-import { LivePreviewContent } from '@/components/preview/LivePreviewContent';
+import { PDFPreviewIframe } from '@/components/preview/PDFPreviewIframe';
 import { DownloadButton } from '@/components/pdf/ResumePDF';
 import { useUiStore } from '../../../lib/stores/uiStore';
 import { useResumeStore } from '../../../lib/stores/resumeStore';
@@ -77,13 +76,8 @@ export function PreviewPageClient({ initialResume }: PreviewPageClientProps) {
           <div className="h-12 w-1 rounded-full bg-slate-200 group-hover:bg-white" />
         </div>
 
-        <main className="flex-1 overflow-y-auto bg-slate-200/60 p-12 custom-scrollbar flex flex-col items-center">
-          <div className="relative">
-            <PreviewPaginator>
-              <LivePreviewContent initialResume={initialResume} />
-            </PreviewPaginator>
-          </div>
-
+        <main className="flex-1 overflow-y-auto bg-slate-200/60 p-12 custom-scrollbar">
+          <PDFPreviewIframe resumeId={initialResume.id} />
         </main>
       </div>
 

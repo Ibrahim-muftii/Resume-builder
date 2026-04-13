@@ -1,179 +1,150 @@
-import { Mail, MapPin, Phone, Globe, Linkedin, Github } from 'lucide-react';
 import type { 
   ResumeSection, 
+  PersonalInfoData, 
   ExperienceData, 
   EducationData, 
   SkillData, 
   ProjectData, 
-  PersonalInfoData,
-  CertificationData,
-  LanguageData,
-  KeyAchievementData,
-  CustomData
+  CertificationData, 
+  LanguageData, 
+  KeyAchievementData, 
+  CustomData 
 } from '../../../../lib/types/resume';
 import { cn } from '../../../lib/utils';
 import { getScaleClass, getTemplateStyles, getVisibleSections, hasSectionContent, type TemplateProps } from './templateShared';
-import { SectionIcon } from './SectionIcon';
 
 const hasText = (value: string | undefined): boolean => Boolean(value && value.trim().length > 0);
 
-const renderSection = (section: ResumeSection) => {
-  return (
-    <section key={section.id} className="space-y-4">
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-1">
-        <SectionIcon type={section.type} className="h-4 w-4" style={{ color: 'var(--primary-color, #059669)' }} />
-        <h2 className="font-bold uppercase tracking-widest text-slate-900" style={{ fontSize: '0.8em' }}>{section.title}</h2>
-      </div>
-
-      <div className="space-y-5">
-        {section.items.map((item) => {
-          if (item.type === 'experience') {
-            const data = item.data as ExperienceData;
-            return (
-              <article key={item.id} data-resume-item className="space-y-1" style={{ breakInside: 'avoid' }}>
-                <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-baseline">
-                  {hasText(data.position) ? <h3 className="font-bold text-slate-900" style={{ fontSize: '1.05em' }}>{data.position}</h3> : null}
-                  <div className="text-slate-400 font-medium" style={{ fontSize: '0.75em' }}>
-                    {data.startDate} {data.endDate ? `— ${data.endDate}` : data.isCurrent ? '— Present' : ''}
-                  </div>
-                </div>
-                {hasText(data.company) ? <p className="font-semibold text-slate-600" style={{ fontSize: '0.9em' }}>{data.company}</p> : null}
-                {data.descriptionBullets && data.descriptionBullets.length > 0 && (
-                  <ul className="mt-2 space-y-1.5 text-slate-600" style={{ fontSize: '0.85em' }}>
-                    {data.descriptionBullets.map((b, i) => (
-                      <li key={i} className="flex gap-2">
-                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-300" />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </article>
-            );
-          }
-          if (item.type === 'education') {
-            const data = item.data as EducationData;
-            return (
-              <article key={item.id} data-resume-item className="space-y-1" style={{ breakInside: 'avoid' }}>
-                <div className="flex justify-between items-baseline">
-                  <h3 className="font-bold text-slate-900" style={{ fontSize: '1em' }}>{data.degree}</h3>
-                  <span className="text-slate-400" style={{ fontSize: '0.75em' }}>{data.startDate} - {data.endDate}</span>
-                </div>
-                <p style={{ color: 'var(--primary-color, #059669)', fontSize: '0.9em' }}>{data.institution}</p>
-              </article>
-            );
-          }
-          if (item.type === 'skills') {
-            const data = item.data as SkillData;
-            return (
-              <div key={item.id} data-resume-item className="inline-block mr-3 mb-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-medium" style={{ fontSize: '0.75em', breakInside: 'avoid' }}>
-                {data.name}
-              </div>
-            );
-          }
-          if (item.type === 'projects') {
-            const data = item.data as ProjectData;
-            return (
-              <article key={item.id} data-resume-item className="space-y-2" style={{ breakInside: 'avoid' }}>
-                <h3 className="font-bold text-slate-900" style={{ fontSize: '1.05em' }}>{data.name}</h3>
-                {hasText(data.descriptionTitle) && <p className="text-slate-600" style={{ fontSize: '0.85em' }}>{data.descriptionTitle}</p>}
-                {data.descriptionBullets && data.descriptionBullets.length > 0 && (
-                  <ul className="mt-1 space-y-1 text-slate-600" style={{ fontSize: '0.8em' }}>
-                    {data.descriptionBullets.map((b, i) => (
-                      <li key={i} className="flex gap-2">
-                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-300" />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </article>
-            );
-          }
-          if (item.type === 'certifications') {
-            const data = item.data as CertificationData;
-            return (
-              <div key={item.id} data-resume-item className="text-sm">
-                <span className="font-bold text-slate-900">{data.name}</span>
-                <span className="text-slate-500 ml-2">({data.issuer})</span>
-              </div>
-            );
-          }
-          if (item.type === 'languages') {
-            const data = item.data as LanguageData;
-            return (
-              <div key={item.id} data-resume-item className="text-sm">
-                <span className="font-bold text-slate-900">{data.name}</span>
-                <span className="text-slate-500 ml-2">({data.proficiency})</span>
-              </div>
-            );
-          }
-          if (item.type === 'key_achievements') {
-            const data = item.data as KeyAchievementData;
-            return (
-              <div key={item.id} data-resume-item className="space-y-1">
-                <h3 className="font-bold text-slate-900">{data.title}</h3>
-                <p className="text-slate-600 text-sm whitespace-pre-wrap">{data.description}</p>
-              </div>
-            );
-          }
-          if (item.type === 'custom') {
-            const data = item.data as CustomData;
-            return (
-              <div key={item.id} data-resume-item className="space-y-1">
-                <h3 className="font-bold text-slate-900">{data.title}</h3>
-                <p className="text-slate-600 text-sm whitespace-pre-wrap">{data.content}</p>
-              </div>
-            );
-          }
-          return null;
-        })}
-      </div>
-    </section>
-  );
-};
-
 export default function MinimalTemplate({ resume, isPreview, scale }: TemplateProps) {
   const sections = getVisibleSections(resume).filter(hasSectionContent);
-  const displaySections = resume.id === 'demo-resume-id' ? resume.sections : sections;
-  const personalInfoSection = displaySections.find((s) => s.type === 'personal_info');
-  const personalInfoItem = personalInfoSection?.items[0];
-  const contentSections = displaySections.filter((s) => s.type !== 'personal_info');
   const customStyles = getTemplateStyles(resume);
+  const isDemo = resume.id === 'demo-resume-id';
+
+  const displaySections = isDemo ? resume.sections : sections;
+  const personalInfoSection = displaySections.find((s) => s.type === 'personal_info');
+  const contentSections = displaySections.filter((s) => s.type !== 'personal_info');
+
+  const renderSection = (section: ResumeSection) => {
+    return (
+      <div key={section.id} className="mb-16 last:mb-0">
+        <div className="flex flex-col items-center mb-10" data-resume-section={section.type}>
+            <h2 className="text-[11px] font-[1000] uppercase tracking-[0.6em] text-zinc-900 border-b-2 border-zinc-900/5 pb-2">
+                {section.title}
+            </h2>
+        </div>
+
+        <div className="space-y-12">
+          {section.items.map((item) => {
+            const baseProps = {
+              key: item.id,
+              'data-resume-item': true,
+              className: "space-y-4",
+              style: { breakInside: 'avoid' as const }
+            };
+
+            if (item.type === 'experience') {
+              const d = item.data as ExperienceData;
+              return (
+                <div {...baseProps} className="flex flex-col items-center text-center">
+                  <div className="space-y-1">
+                    <h3 className="text-[18px] font-black text-zinc-950 tracking-tighter leading-none lowercase tracking-tight">{d.position}</h3>
+                    <div className="flex items-center justify-center gap-3 text-[10px] font-black text-zinc-300 uppercase tracking-widest pt-1">
+                       <span className="text-zinc-900">{d.company}</span>
+                       <span className="h-1 w-1 rounded-full bg-zinc-100" />
+                       <span>{d.location}</span>
+                    </div>
+                    <p className="text-[9px] font-black text-zinc-200 uppercase tracking-[0.3em] font-mono mt-1">{d.startDate} // {d.endDate}</p>
+                  </div>
+                  {d.descriptionBullets && d.descriptionBullets.length > 0 && (
+                    <ul className="max-w-[85%] space-y-3 text-[13px] text-zinc-500 leading-relaxed font-bold lowercase opacity-80">
+                      {d.descriptionBullets.map((bullet, i) => (
+                        <li key={i} className="relative before:content-['—'] before:mr-2 before:text-zinc-200">{bullet}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            }
+
+            if (item.type === 'education') {
+              const d = item.data as EducationData;
+              return (
+                <div {...baseProps} className="flex flex-col items-center text-center">
+                  <h3 className="text-[16px] font-black text-zinc-950 lowercase tracking-tight">{d.institution}</h3>
+                  <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mt-1">{d.degree}{d.field ? ` · ${d.field}` : ''}</p>
+                  <p className="text-[9px] font-black text-zinc-200 uppercase tracking-widest mt-2">{d.startDate} — {d.endDate}</p>
+                </div>
+              );
+            }
+
+            if (item.type === 'skills') {
+              const d = item.data as SkillData;
+              return (
+                <div {...baseProps} className="flex flex-col items-center text-center px-6 py-4 bg-zinc-50 rounded-full border border-zinc-100 min-w-[160px] inline-flex mr-4 mb-4 transition-all hover:bg-zinc-100 hover:scale-105 cursor-default">
+                  <span className="text-[13px] font-black text-zinc-900 tracking-tighter lowercase">{d.name}</span>
+                  <span className="text-[8px] font-black uppercase text-zinc-300 mt-1 tracking-widest">{d.level}</span>
+                </div>
+              );
+            }
+
+            return (
+              <div {...baseProps} className="flex flex-col items-center text-center">
+                  <h3 className="text-[15px] font-black text-zinc-900 lowercase italic">{(item.data as any).name || (item.data as any).title}</h3>
+                  <p className="text-[13px] text-zinc-500 max-w-[85%] mx-auto font-bold lowercase opacity-80">{(item.data as any).descriptionTitle || (item.data as any).description || (item.data as any).content}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div 
-      className={cn('w-full min-h-[1100px] text-slate-800 antialiased font-sans', getScaleClass(scale), isPreview ? 'mx-auto' : '')}
+    <div
+      className={cn(
+        'w-full min-h-[1100px] antialiased bg-white text-zinc-950 font-sans relative',
+        getScaleClass(scale),
+        isPreview ? 'mx-auto' : ''
+      )}
       style={{
         ...customStyles,
-        fontFamily: 'var(--font-family, Inter, sans-serif)',
-        backgroundColor: 'var(--background-color, white)',
+        fontFamily: 'var(--font-family, "Inter", sans-serif)',
         fontSize: 'var(--font-size, 16px)',
       }}
     >
-      <div className="mx-auto max-w-[800px] px-10 py-12 space-y-10">
-        {personalInfoItem?.type === 'personal_info' && (
-          <header className="space-y-6 text-center">
+      <div className="max-w-[700px] mx-auto pt-24 px-12 pb-32">
+        {personalInfoSection && personalInfoSection.items[0]?.type === 'personal_info' && (
+          <header className="mb-32 text-center flex flex-col items-center">
             {(() => {
-              const data = personalInfoItem.data as PersonalInfoData;
-              return (
-                <>
-                  <div className="space-y-2">
-                    <h1 className="font-bold tracking-tight text-slate-950" style={{ fontSize: '2.5em' }}>{data.fullName}</h1>
-                    <p className="font-medium uppercase tracking-[0.3em]" style={{ color: 'var(--primary-color, #059669)', fontSize: '1em' }}>{data.jobTitle}</p>
+                const d = personalInfoSection.items[0].data as PersonalInfoData;
+                return (
+                  <div className="space-y-16">
+                    <div className="space-y-6">
+                      <h1 className="text-[48px] font-black leading-none tracking-[-0.08em] text-zinc-950 lowercase">{d.fullName}</h1>
+                      <div className="h-1.5 w-12 bg-zinc-950 rounded-full mx-auto" />
+                      <p className="text-[14px] font-black text-zinc-400 uppercase tracking-[0.7em] ml-[0.7em] leading-none">{d.jobTitle}</p>
+                    </div>
+                    
+                    <div className="flex flex-wrap flex-col items-center gap-y-3 text-[11px] font-black text-zinc-200 uppercase tracking-[0.4em]">
+                       {hasText(d.email) && <span className="text-zinc-950 border-b border-zinc-950 pb-1">{d.email}</span>}
+                       <div className="flex gap-6">
+                          {hasText(d.phone) && <span>{d.phone}</span>}
+                          {hasText(d.location) && <span>{d.location}</span>}
+                       </div>
+                    </div>
+
+                    {hasText(d.summary) && (
+                      <p className="text-[15px] text-zinc-400 leading-[2.2] font-black max-w-[90%] mx-auto lowercase opacity-80 decoration-zinc-100 underline-offset-8">
+                        {d.summary}
+                      </p>
+                    )}
                   </div>
-                  <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-slate-500" style={{ fontSize: '0.8em' }}>
-                    {data.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {data.email}</span>}
-                    {data.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {data.phone}</span>}
-                    {data.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {data.location}</span>}
-                  </div>
-                </>
-              );
+                );
             })()}
           </header>
         )}
 
-        <div className="space-y-10">
+        <div className="space-y-6">
           {contentSections.map(renderSection)}
         </div>
       </div>

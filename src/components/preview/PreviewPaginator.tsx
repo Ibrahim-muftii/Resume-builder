@@ -48,70 +48,70 @@ export function PreviewPaginator({ children }: PreviewPaginatorProps) {
       container.querySelectorAll('[data-resume-item], [data-resume-section]')
     ) as HTMLElement[];
 
-    // Step 1: Clean slate
+    const PAGE_MARGIN_TOP = 72; // Professional 0.75in margin
+    const PAGE_MARGIN_BOTTOM = 72;
 
-    const SAFETY_ZONE = 80; // Larger zone to ensure titles + context don't get orphaned
-    const TOP_PADDING = 30; // Extra breathing room at the top of a new page
+    container.style.paddingTop = `${PAGE_MARGIN_TOP}px`;
+    container.style.paddingBottom = `${PAGE_MARGIN_BOTTOM}px`;
 
     for (let pass = 0; pass < 30; pass++) {
       let anyPushed = false;
 
       for (let i = 0; i < items.length; i++) {
         const el = items[i];
-        
-        // Strategy: Temporarily clear this item's margin to see where it would naturally fall
-        // after previous elements have shifted.
         const originalMargin = el.style.marginTop;
         el.style.marginTop = '0px';
         void container.offsetHeight;
 
-        let bounds = getBounds(el);
-        let currentPage = Math.floor(bounds.top / SLOT);
-        let pageEnd = currentPage * SLOT + PAGE_HEIGHT;
-        let pushLimit = pageEnd - SAFETY_ZONE;
+        const bounds = getBounds(el);
+        const top = bounds.top;
+        const bottom = bounds.bottom;
+
+        const currentPage = Math.floor(top / SLOT);
+        const pageBottomLimit = (currentPage + 1) * SLOT - GAP - PAGE_MARGIN_BOTTOM;
+        const pageTopLimit = currentPage * SLOT + PAGE_MARGIN_TOP;
 
         let needsPush = false;
 
-        // Condition A: Item starts in the "GAP" zone
-        if (bounds.top >= pageEnd - 5) {
-          needsPush = true;
-        }
-        // Condition B: Item extends into the GAP zone or too close to the end
-        else if (bounds.bottom > pushLimit) {
-          const isAtPageTop = bounds.top <= currentPage * SLOT + 5;
-          if (!isAtPageTop) {
+        // 1. Split Prevention: Does this item cross the bottom margin?
+        if (bottom > pageBottomLimit) {
+          if (top > pageTopLimit + 20) {
             needsPush = true;
           }
         }
-        // Condition C: "Orphan" Prevention — Heading with content on next page
-        else if (i < items.length - 1) {
-          const isHeading = el.hasAttribute('data-resume-section') || el.tagName === 'H2' || el.tagName === 'H3';
+
+        // 2. Orphan Prevention
+        if (!needsPush && i < items.length - 1) {
+          const isHeading = el.hasAttribute('data-resume-section');
           if (isHeading) {
-            const nextBounds = getBounds(items[i + 1]);
-            const nextPage = Math.floor(nextBounds.top / SLOT);
+            const nextEl = items[i+1];
+            const nextBounds = getBounds(nextEl);
+            const nextTop = nextBounds.top;
+            
+            const nextPage = Math.floor(nextTop / SLOT);
             if (nextPage > currentPage) {
-              needsPush = true;
+               needsPush = true;
+            } else if (nextBounds.bottom > pageBottomLimit) {
+               needsPush = true;
             }
           }
         }
 
         if (needsPush) {
-          const nextStart = (currentPage + 1) * SLOT;
-          const shift = nextStart - bounds.top;
+          const nextPageStart = (currentPage + 1) * SLOT;
+          const shift = nextPageStart - top + PAGE_MARGIN_TOP;
 
           if (shift > 0.1) {
-            el.style.marginTop = `${shift + TOP_PADDING}px`;
+            el.style.marginTop = `${shift}px`;
             void container.offsetHeight;
             anyPushed = true;
           } else {
-            // It shifted slightly or was almost there, restore if no push needed
             el.style.marginTop = '0px';
           }
         } else {
-            // Re-read bounds if we changed it
-            if (originalMargin !== '0px') {
-                anyPushed = true; // Something changed in the pass
-            }
+          if (originalMargin !== '0px') {
+            anyPushed = true;
+          }
         }
       }
 

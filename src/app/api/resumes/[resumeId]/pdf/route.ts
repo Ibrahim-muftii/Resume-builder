@@ -11,6 +11,9 @@ export async function GET(
 ) {
   try {
     const { resumeId } = await params;
+    const { searchParams } = new URL(request.url);
+    const isPreview = searchParams.get('preview') === 'true';
+    
     const cookieStore = await cookies();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -78,89 +81,87 @@ export async function GET(
     // CRITICAL: Wait for ALL fonts to be loaded before any pagination or printing
     await page.evaluateHandle('document.fonts.ready');
 
-    // CRITICAL: Pre-pagination script — physically move items that cross page boundaries
     const debugInfo = await page.evaluate((settings) => {
       const FULL_PAGE = 1123;
-      const PAGE_MARGIN_TOP = 20;
-      const PAGE_MARGIN_BOTTOM = 20;
-      const SAFETY_BUFFER = 5;
-      const PRINTABLE_HEIGHT = FULL_PAGE - PAGE_MARGIN_TOP - PAGE_MARGIN_BOTTOM;
+      const PAGE_MARGIN_TOP = 72; // Professional 0.75in margin
+      const PAGE_MARGIN_BOTTOM = 72;
+      const PRINTABLE_HEIGHT = FULL_PAGE; 
+      const SAFETY_ZONE = 120; 
 
       // Remove any previously injected spacers
       document.querySelectorAll('.pdf-page-spacer').forEach(s => s.remove());
 
-      // Broad selectors to find all possible resume items AND section headings
       const rawItems = Array.from(document.querySelectorAll(
-        '[data-resume-item], [data-resume-section], .space-y-0 > div, .space-y-1 > div, .space-y-2 > div, .space-y-3 > div, .space-y-4 > div, .space-y-5 > div, .space-y-6 > div, article'
+        '[data-resume-item], [data-resume-section]'
       ));
       const uniqueItems = [...new Set(rawItems)] as HTMLElement[];
       const debugLog: string[] = [];
-      debugLog.push(`Found ${uniqueItems.length} resume items`);
 
-      // Multi-pass: push ONE item per pass, then re-scan
-      for (let pass = 0; pass < 20; pass++) {
+      // Ensure the container has enough padding for the first page
+      const container = document.getElementById('resume-container');
+      if (container) {
+        container.style.paddingTop = `${PAGE_MARGIN_TOP}px`;
+        container.style.paddingBottom = `${PAGE_MARGIN_BOTTOM}px`;
+      }
+
+      for (let pass = 0; pass < 30; pass++) {
         let pushed = false;
 
         for (let i = 0; i < uniqueItems.length; i++) {
           const el = uniqueItems[i];
           const rect = el.getBoundingClientRect();
-          const top = rect.top;
-          const bottom = rect.bottom;
+          
+          // Position relative to the very top of the document
+          const top = rect.top + window.scrollY;
+          const bottom = rect.bottom + window.scrollY;
 
-          const pageIndex = Math.floor(top / PRINTABLE_HEIGHT);
-          const pageBottomBoundary = (pageIndex + 1) * PRINTABLE_HEIGHT - SAFETY_BUFFER;
+          const currentPage = Math.floor(top / FULL_PAGE);
+          const pageBottomLimit = (currentPage + 1) * FULL_PAGE - PAGE_MARGIN_BOTTOM;
+          const pageTopLimit = currentPage * FULL_PAGE + PAGE_MARGIN_TOP;
 
           let shouldPush = false;
 
-          // FIX: Catch items that EXTEND past the boundary (not just straddling)
-          if (bottom > pageBottomBoundary) {
-            shouldPush = true;
+          // 1. Split Prevention: Does this item cross the bottom margin?
+          if (bottom > pageBottomLimit) {
+            // Only push if it's NOT already at the very top of the page 
+            // (to avoid infinite loops on items larger than a page)
+            if (top > pageTopLimit + 20) {
+                shouldPush = true;
+            }
           }
 
-          // Orphan heading: heading on page N, next item on page N+1
-          if (!shouldPush && i < uniqueItems.length - 1 && el.hasAttribute('data-resume-section')) {
-            const nextTop = uniqueItems[i + 1].getBoundingClientRect().top;
-            if (Math.floor(nextTop / PRINTABLE_HEIGHT) > pageIndex) {
-              shouldPush = true;
+          // 2. Orphan Prevention: Heading on Page N, Content on Page N+1
+          if (!shouldPush && i < uniqueItems.length - 1) {
+            const isHeading = el.hasAttribute('data-resume-section');
+            if (isHeading) {
+              const nextEl = uniqueItems[i+1];
+              const nextRect = nextEl.getBoundingClientRect();
+              const nextTop = nextRect.top + window.scrollY;
+              
+              const nextPage = Math.floor(nextTop / FULL_PAGE);
+              if (nextPage > currentPage) {
+                shouldPush = true;
+              } else if (nextRect.bottom + window.scrollY > pageBottomLimit) {
+                // If the next item is GOING to be pushed, push the heading now
+                shouldPush = true;
+              }
             }
           }
 
           if (shouldPush) {
-            const nextPageStart = (pageIndex + 1) * PRINTABLE_HEIGHT;
-            const spacerHeight = nextPageStart - top;
+            const nextPageStart = (currentPage + 1) * FULL_PAGE;
+            const spacerHeight = nextPageStart - top + PAGE_MARGIN_TOP;
 
             if (spacerHeight > 0) {
-              debugLog.push(`Pass ${pass}: Pushing item at top=${Math.round(top)} bottom=${Math.round(bottom)} to next page (spacer=${Math.round(spacerHeight)}px)`);
-
-              // If orphan heading push, remove spacers before subsequent items
-              if (el.hasAttribute('data-resume-section')) {
-                for (let j = i + 1; j < uniqueItems.length; j++) {
-                  if (uniqueItems[j].hasAttribute('data-resume-section')) break;
-                  const prev = uniqueItems[j].previousElementSibling;
-                  if (prev && prev.classList.contains('pdf-page-spacer')) {
-                    prev.remove();
-                  }
-                }
-              }
-
               const spacer = document.createElement('div');
               spacer.className = 'pdf-page-spacer';
               spacer.style.height = `${spacerHeight}px`;
               spacer.style.width = '100%';
               spacer.style.display = 'block';
-              spacer.style.flexShrink = '0';
               el.parentNode?.insertBefore(spacer, el);
-
-              // Apply direct styles to the container
-              const container = document.getElementById('resume-container');
-              if (container) {
-                container.style.fontFamily = `'${settings?.fontFamily || 'Inter'}', sans-serif`;
-                container.style.backgroundColor = settings?.backgroundColor || 'white';
-                container.style.fontSize = '16px';
-              }
-
+              
               pushed = true;
-              break; // Re-scan from beginning
+              break; // Restart loop to account for layout shift
             }
           }
         }
@@ -203,7 +204,7 @@ export async function GET(
       width: '794px',
       height: '1123px',
       printBackground: true,
-      margin: { top: '20px', bottom: '20px' },
+      margin: { top: '0px', bottom: '0px', left: '0px', right: '0px' },
     });
 
     await browser.close();
@@ -213,7 +214,7 @@ export async function GET(
     return new NextResponse(pdf, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Disposition': isPreview ? 'inline' : `attachment; filename="${filename}"`,
       },
     });
   } catch (error) {
