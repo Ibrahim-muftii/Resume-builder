@@ -457,8 +457,8 @@ export default function ProfessionalTemplate({ resume, isPreview, scale }: Templ
     <div
       id="resume-container"
       className={cn(
-        'w-full min-h-[1100px] antialiased transition-all duration-300',
-        'py-[40px] px-[44px]',
+        'w-full  antialiased transition-all duration-300',
+        'pt-0 px-[44px]',
         getScaleClass(scale),
         isPreview ? 'mx-auto' : ''
       )}

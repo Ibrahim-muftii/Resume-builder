@@ -112,7 +112,7 @@ export default function ExecutiveTemplate({ resume, isPreview, scale }: Template
   return (
     <div
       className={cn(
-        'w-full min-h-[1100px] antialiased bg-[#FFFFFF] text-zinc-950 font-serif relative',
+        'w-full  antialiased bg-[#FFFFFF] text-zinc-950 font-serif relative',
         getScaleClass(scale),
         isPreview ? 'mx-auto' : ''
       )}
@@ -125,7 +125,7 @@ export default function ExecutiveTemplate({ resume, isPreview, scale }: Template
       {/* Structural Detailing */}
       <div className="absolute top-0 inset-x-0 h-1.5 bg-zinc-900" style={{ backgroundColor: 'var(--primary-color, #18181b)' }} />
 
-      <div className="max-w-[7.5in] mx-auto pt-16 px-12 pb-24">
+      <div className="max-w-[7.5in] mx-auto px-12 pt-0">
         {personalInfoSection && personalInfoSection.items[0]?.type === 'personal_info' && (
           <header className="mb-16">
             {(() => {
