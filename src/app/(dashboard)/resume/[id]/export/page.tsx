@@ -6,9 +6,9 @@ import MinimalTemplate from '@/components/templates/templates/MinimalTemplate';
 import CreativeTemplate from '@/components/templates/templates/CreativeTemplate';
 import ExecutiveTemplate from '@/components/templates/templates/ExecutiveTemplate';
 import ProfessionalTemplate from '@/components/templates/templates/ProfessionalTemplate';
-import { sectionItemDataSchema } from '../../../../../../lib/validations/resumeSchema';
-import { getDefaultSectionItem } from '../../../../../../lib/utils/sectionDefaults';
-import type { Resume, ResumeSection, SectionItem, SectionItemData, SectionType, TemplateId } from '../../../../../../lib/types/resume';
+import type { Resume, ResumeSection, SectionItem, SectionItemData, SectionType } from 'lib/types/resume';
+import { sectionItemDataSchema } from 'lib/validations/resumeSchema';
+import { getDefaultSectionItem } from 'lib/utils/sectionDefaults';
 
 type ExportPageProps = {
   params: Promise<{ id: string }>;
@@ -133,46 +133,145 @@ export default async function ResumeExportPage({ params }: ExportPageProps) {
   else Template = ModernTemplate;
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen antialiased">
       <style dangerouslySetInnerHTML={{
         __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700;800;900&family=Libre+Baskerville:wght@400;700&display=swap');
 
-        @page { 
-          size: 794px 1123px;
-          margin: 20px !important;
+        @page {
+          size: A4;
+          margin: 0;
         }
+
         body { 
           margin: 0; 
           padding: 0; 
-          -webkit-print-color-adjust: exact !important; 
-          print-color-adjust: exact !important;
           background-color: white;
-        }
-        .printable-page {
-          width: 752px;
+          width: 794px;
           margin: 0 auto;
-          background-color: white;
-        }
-        * { 
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important; 
         }
 
-        /* ===== CRITICAL: Prevent ANY item from splitting across pages ===== */
-        [data-resume-item] {
-          break-inside: avoid !important;
-          page-break-inside: avoid !important;
+        #resume-container {
+          width: 100%;
+          background-color: white;
+          position: relative;
         }
-        
-        article {
-          break-inside: avoid !important;
-          page-break-inside: avoid !important;
+
+        .pdf-page-jump {
+          display: block;
+          width: 100%;
+          background: white;
+          pointer-events: none;
+        }
+
+        @media print {
+          body { width: 100%; margin: 0; }
+          .pdf-page-jump { display: block; background: white; }
         }
       `}} />
-      <div className="printable-page">
+      <div id="resume-container">
         <Template {...props} />
       </div>
+
+      <script dangerouslySetInnerHTML={{
+        __html: `
+        async function paginate() {
+          await document.fonts.ready;
+          const FULL_PAGE = 1123;
+          const PAGE_MARGIN_TOP = 64;
+          const PAGE_MARGIN_BOTTOM = 64;
+
+          const templateId = '${templateId}';
+          const initialTopMargin = templateId === 'creative' ? 0 : PAGE_MARGIN_TOP;
+
+          document.querySelectorAll('.pdf-page-jump').forEach(s => s.remove());
+          const container = document.getElementById('resume-container');
+          if (!container) return;
+          
+          container.style.paddingTop = initialTopMargin + 'px';
+          container.style.paddingBottom = PAGE_MARGIN_BOTTOM + 'px';
+
+          for (let pass = 0; pass < 35; pass++) {
+            let pushed = false;
+            const items = Array.from(document.querySelectorAll('[data-resume-item], [data-resume-section]'));
+            const containerTop = container.getBoundingClientRect().top;
+            
+            for (let i = 0; i < items.length; i++) {
+              const el = items[i];
+              const rect = el.getBoundingClientRect();
+              const relativeTop = rect.top - containerTop;
+              const relativeBottom = rect.bottom - containerTop;
+
+              const currentPageIndex = Math.floor(relativeTop / FULL_PAGE);
+              const pageBottomLimit = (currentPageIndex + 1) * FULL_PAGE - PAGE_MARGIN_BOTTOM;
+              // Subsequent pages ALWAYS have PAGE_MARGIN_TOP (64px) for consistency
+              const pageTopLimit = currentPageIndex * FULL_PAGE + PAGE_MARGIN_TOP;
+              
+              let shouldPush = false;
+
+              // 0. Margin Violation Check: If we are on page 2+ and the item is inside the top margin
+              if (currentPageIndex > 0 && relativeTop < pageTopLimit) {
+                  shouldPush = true;
+              }
+
+              if (!shouldPush && relativeBottom > pageBottomLimit) {
+                if (relativeTop > pageTopLimit + 20) {
+                    shouldPush = true;
+                }
+              }
+
+              // Orphan Heading Protection
+              if (!shouldPush && el.hasAttribute('data-resume-section') && i < items.length - 1) {
+                  const nextEl = items[i+1];
+                  const nextRect = nextEl.getBoundingClientRect();
+                  const nextRelativeTop = nextRect.top - containerTop;
+                  const nextRelativeBottom = nextRect.bottom - containerTop;
+                  const nextItemPage = Math.floor(nextRelativeTop / FULL_PAGE);
+
+                  if (nextItemPage > currentPageIndex || nextRelativeBottom > pageBottomLimit) {
+                    if (relativeTop > pageTopLimit + 20) {
+                        shouldPush = true;
+                        
+                        // Sync with ModernTemplate Grid Row structure
+                        const row = el.closest('[data-resume-section-row]');
+                        if (row) {
+                            const rowTop = row.getBoundingClientRect().top - containerTop;
+                            const jump = document.createElement('div');
+                            jump.className = 'pdf-page-jump';
+                            jump.style.background = 'transparent';
+                            // Jumps ALWAYS push to the TOP MARGIN of the next page
+                            jump.style.height = ( ((currentPageIndex + 1) * FULL_PAGE) - rowTop + PAGE_MARGIN_TOP ) + 'px';
+                            row.parentNode.insertBefore(jump, row);
+                            pushed = true;
+                            break;
+                        }
+                    }
+                  }
+              }
+
+              if (shouldPush && !pushed) {
+                  const jump = document.createElement('div');
+                  jump.className = 'pdf-page-jump';
+                  jump.style.background = 'transparent';
+                  const effectiveTargetTop = (currentPageIndex > 0 && relativeTop < pageTopLimit)
+                    ? pageTopLimit
+                    : (currentPageIndex + 1) * FULL_PAGE + PAGE_MARGIN_TOP;
+
+                  jump.style.height = (effectiveTargetTop - relativeTop) + 'px';
+                  el.parentNode.insertBefore(jump, el);
+                  pushed = true;
+                  break;
+              }
+            }
+            if (!pushed) break;
+          }
+        }
+        if (document.readyState === 'complete') {
+          paginate();
+        } else {
+          window.addEventListener('load', paginate);
+        }
+      `}} />
     </div>
   );
 }

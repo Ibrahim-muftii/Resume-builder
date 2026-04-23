@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, Share2 } from 'lucide-react';
+import { ChevronLeft, Share2, RefreshCw } from 'lucide-react';
 import { FontLoader } from '@/components/templates/FontLoader';
 import { ResumeStoreInitializer } from '@/components/preview/ResumeStoreInitializer';
 import { PreviewSidebar } from '@/components/preview/PreviewSidebar';
@@ -23,6 +23,9 @@ export function PreviewPageClient({ initialResume }: PreviewPageClientProps) {
   const setSidebarWidth = useUiStore((state) => state.setSidebarWidth);
   const updateSettings = useResumeStore((state) => state.updateSettings);
   const [isResizing, setIsResizing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleSync = () => setRefreshKey(v => v + 1);
 
   // Enable auto-save on the preview page
   useAutoSave();
@@ -44,10 +47,14 @@ export function PreviewPageClient({ initialResume }: PreviewPageClientProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-zinc-50 hover:shadow-sm cursor-help">
-              <Share2 className="h-3 w-3 text-emerald-600" />
-              {/* {initialResume.isPublic ? 'Sharing Active' : 'Private'} */}
-            </div>
+            <button 
+              onClick={handleSync}
+              className="group flex items-center gap-2.5 px-4 py-2 rounded-xl border border-zinc-200 bg-white text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-emerald-600 transition-all hover:border-emerald-200 hover:shadow-sm"
+            >
+                <RefreshCw className="h-3.5 w-3.5 text-emerald-600 transition-transform duration-700 group-active:rotate-180" />
+                Sync Final PDF
+            </button>
+            <div className="h-6 w-[1px] bg-zinc-100 mx-1" />
             <DownloadButton resume={initialResume} templateId={initialResume.templateId} />
           </div>
         </div>
@@ -76,8 +83,8 @@ export function PreviewPageClient({ initialResume }: PreviewPageClientProps) {
           <div className="h-12 w-1 rounded-full bg-slate-200 group-hover:bg-white" />
         </div>
 
-        <main className="flex-1 overflow-y-auto bg-slate-200/60 p-12 custom-scrollbar">
-          <PDFPreviewIframe resumeId={initialResume.id} />
+        <main className="flex-1 overflow-y-auto bg-slate-200/60 custom-scrollbar">
+          <PDFPreviewIframe resumeId={initialResume.id} refreshKey={refreshKey} />
         </main>
       </div>
 
