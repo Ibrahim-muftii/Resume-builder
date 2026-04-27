@@ -112,7 +112,14 @@ export default function MinimalTemplate({ resume, isPreview, scale }: TemplatePr
         fontSize: 'var(--font-size, 16px)',
       }}
     >
+<<<<<<< Updated upstream
       <div className="max-w-[700px] mx-auto pt-24 px-12 pb-32">
+=======
+      <div className={cn(
+        "mx-auto pt-0 pb-12",
+        isPreview ? "max-w-[720px] px-[44px]" : "max-w-[800px] px-12"
+      )}>
+>>>>>>> Stashed changes
         {personalInfoSection && personalInfoSection.items[0]?.type === 'personal_info' && (
           <header className="mb-32 text-center flex flex-col items-center">
             {(() => {

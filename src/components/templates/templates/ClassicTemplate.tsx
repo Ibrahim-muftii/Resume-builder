@@ -36,6 +36,7 @@ export default function ClassicTemplate({ resume, isPreview, scale }: TemplatePr
 
   const renderSectionContent = (section: ResumeSection) => {
     return (
+<<<<<<< Updated upstream
       <div className="space-y-6">
         {section.items.map((item) => {
           const baseItemProps = {
@@ -44,10 +45,29 @@ export default function ClassicTemplate({ resume, isPreview, scale }: TemplatePr
             className: "space-y-2",
             style: { breakInside: 'avoid' as const }
           };
+=======
+      <div key={section.id} className="space-y-3 mb-6">
+        <div data-resume-section-row className="flex items-center gap-4 mb-3">
+            <div className="h-[0.5px] flex-1 bg-zinc-300" />
+            <h2 data-resume-section={section.type} className="text-[11px] font-black uppercase tracking-[0.25em] text-zinc-900 leading-none whitespace-nowrap">
+                {section.title}
+            </h2>
+            <div className="h-[0.5px] flex-1 bg-zinc-300" />
+        </div>
+
+        <div className="space-y-4">
+          {section.items.map((item) => {
+            const baseProps = {
+              'data-resume-item': true,
+              className: "space-y-1.5",
+              style: { breakInside: 'avoid' as const }
+            };
+>>>>>>> Stashed changes
 
           if (item.type === 'experience') {
             const d = item.data as ExperienceData;
             return (
+<<<<<<< Updated upstream
               <div {...baseItemProps}>
                 <div className="flex justify-between items-start">
                   <div className="space-y-0.5">
@@ -66,6 +86,85 @@ export default function ClassicTemplate({ resume, isPreview, scale }: TemplatePr
                     ))}
                   </ul>
                 )}
+=======
+              <div key={item.id} data-resume-section-row>
+                {(() => {
+                  if (item.type === 'experience') {
+                    const d = item.data as ExperienceData;
+                    return (
+                      <div key={item.id} {...baseProps}>
+                        <div className="flex justify-between items-baseline">
+                          <h3 className="text-[13.5px] font-black text-zinc-950 tracking-tight">{d.company}</h3>
+                          <span className="text-[10px] font-black text-zinc-500 tabular-nums uppercase">{d.startDate} — {d.endDate}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <p className="text-[11.5px] font-bold text-zinc-700 italic">{d.position}</p>
+                          <span className="text-[10px] font-medium text-zinc-400 italic">{d.location}</span>
+                        </div>
+                        {d.descriptionBullets && d.descriptionBullets.length > 0 && (
+                          <ul className="list-disc list-outside ml-4 mt-1 space-y-1 text-[11.5px] text-zinc-800 leading-relaxed font-medium">
+                            {d.descriptionBullets.map((bullet, i) => (
+                              <li key={i} className="pl-1">{bullet}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  if (item.type === 'projects') {
+                    const d = item.data as ProjectData;
+                    return (
+                      <div key={item.id} {...baseProps}>
+                        <div className="flex justify-between items-baseline">
+                          <h3 className="text-[13px] font-black text-zinc-950">{d.name}</h3>
+                          {hasText(d.url) && <span className="text-[9px] font-bold text-zinc-400 underline">{d.url}</span>}
+                        </div>
+                        {hasText(d.descriptionTitle) && (
+                           <p className="text-[10.5px] font-bold text-zinc-500 italic leading-none">{d.descriptionTitle}</p>
+                        )}
+                        {d.descriptionBullets && d.descriptionBullets.length > 0 && (
+                          <ul className="list-disc list-outside ml-4 mt-1 space-y-1 text-[11.5px] text-zinc-800 leading-relaxed font-medium">
+                            {d.descriptionBullets.map((bullet, i) => (
+                              <li key={i} className="pl-1">{bullet}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  if (item.type === 'education') {
+                    const d = item.data as EducationData;
+                    return (
+                      <div key={item.id} {...baseProps}>
+                        <div className="flex justify-between items-baseline">
+                          <h3 className="text-[13px] font-black text-zinc-950">{d.institution}</h3>
+                          <span className="text-[10px] font-black text-zinc-400 uppercase">{d.startDate} — {d.endDate}</span>
+                        </div>
+                        <p className="text-[11px] font-bold text-zinc-700 italic">{d.degree}{d.field ? `, ${d.field}` : ''}</p>
+                      </div>
+                    );
+                  }
+
+                  if (item.type === 'languages') {
+                    const d = item.data as LanguageData;
+                    return (
+                      <div key={item.id} {...baseProps} className="flex gap-2 text-[11.5px]">
+                         <span className="font-black text-zinc-900 uppercase tracking-tighter">{d.name}:</span>
+                         <span className="font-medium text-zinc-600 italic">{d.proficiency}</span>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={item.id} {...baseProps}>
+                        <h3 className="text-[12px] font-black text-zinc-950">{(item.data as any).name || (item.data as any).title}</h3>
+                        <p className="text-[11px] text-zinc-800 leading-relaxed">{(item.data as any).description || (item.data as any).content}</p>
+                    </div>
+                  );
+                })()}
+>>>>>>> Stashed changes
               </div>
             );
           }
@@ -129,9 +228,18 @@ export default function ClassicTemplate({ resume, isPreview, scale }: TemplatePr
         fontSize: 'var(--font-size, 16px)',
       }}
     >
+<<<<<<< Updated upstream
       <div className="max-w-[7.5in] mx-auto pt-20 px-16 pb-32">
         {personalInfoItem && personalInfoItem.type === 'personal_info' && (
           <header className="text-center space-y-8 mb-16 border-b-4 border-zinc-900 pb-12">
+=======
+      <div className={cn(
+        "mx-auto pt-0 pb-12",
+        isPreview ? "max-w-[720px] px-[44px]" : "max-w-[800px] px-12"
+      )}>
+        {personalInfoSection && personalInfoSection.items[0]?.type === 'personal_info' && (
+          <header className="text-left space-y-4 mb-10">
+>>>>>>> Stashed changes
             {(() => {
                 const d = personalInfoItem.data as PersonalInfoData;
                 return (

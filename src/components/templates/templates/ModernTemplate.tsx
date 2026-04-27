@@ -120,7 +120,14 @@ export default function ModernTemplate({ resume, isPreview, scale }: TemplatePro
         fontSize: 'var(--font-size, 16px)',
       }}
     >
+<<<<<<< Updated upstream
       <div className="max-w-[800px] mx-auto pt-20 px-12 pb-24">
+=======
+      <div className={cn(
+        "mx-auto pt-0 pb-8",
+        isPreview ? "max-w-[720px] px-[44px]" : "max-w-[800px] px-10"
+      )}>
+>>>>>>> Stashed changes
         {personalInfoSection && personalInfoSection.items[0]?.type === 'personal_info' && (
           <header className="mb-20 grid grid-cols-[180px_1fr] gap-12 items-center">
              <div className="text-right">

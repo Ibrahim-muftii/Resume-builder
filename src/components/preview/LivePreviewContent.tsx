@@ -8,6 +8,7 @@ import MinimalTemplate from '@/components/templates/templates/MinimalTemplate';
 import CreativeTemplate from '@/components/templates/templates/CreativeTemplate';
 import ExecutiveTemplate from '@/components/templates/templates/ExecutiveTemplate';
 import ProfessionalTemplate from '@/components/templates/templates/ProfessionalTemplate';
+import LondonTemplate from '@/components/templates/templates/LondonTemplate';
 import type { Resume, TemplateId } from '../../../lib/types/resume';
 
 interface LivePreviewContentProps {
@@ -23,6 +24,7 @@ const renderTemplate = (resume: Resume, templateId: TemplateId): ReactElement =>
     case 'minimal': return <MinimalTemplate {...props} />;
     case 'creative': return <CreativeTemplate {...props} />;
     case 'executive': return <ExecutiveTemplate {...props} />;
+    case 'london': return <LondonTemplate {...props} />;
     default: return <ModernTemplate {...props} />;
   }
 };

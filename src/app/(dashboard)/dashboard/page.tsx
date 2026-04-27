@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     .from('resume_sections')
     .select('*')
     .in('resume_id', resumeIds)
-    .order('sort_order', { ascending: true });
+    .order('position', { ascending: true });
 
   const sectionIds = (allSections ?? []).map(s => s.id);
 
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
       .from('section_items')
       .select('*')
       .in('section_id', sectionIds)
-      .order('sort_order', { ascending: true });
+      .order('position', { ascending: true });
     allItems = (data ?? []) as SectionItemRow[];
   }
 

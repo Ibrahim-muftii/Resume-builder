@@ -15,11 +15,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import CreativeTemplate from '@/components/templates/templates/CreativeTemplate';
+import ExecutiveTemplate from '@/components/templates/templates/ExecutiveTemplate';
+import ProfessionalTemplate from '@/components/templates/templates/ProfessionalTemplate';
+import LondonTemplate from '@/components/templates/templates/LondonTemplate';
 import ModernTemplate from '@/components/templates/templates/ModernTemplate';
 import ClassicTemplate from '@/components/templates/templates/ClassicTemplate';
 import MinimalTemplate from '@/components/templates/templates/MinimalTemplate';
-import CreativeTemplate from '@/components/templates/templates/CreativeTemplate';
-import ExecutiveTemplate from '@/components/templates/templates/ExecutiveTemplate';
 import type { Resume, TemplateId } from '../../../lib/types/resume';
 
 type ResumeCardProps = {
@@ -34,9 +36,13 @@ const templateLabels: Record<TemplateId, string> = {
   minimal: 'Minimal',
   creative: 'Creative',
   executive: 'Executive',
+  london: 'London',
+  professional: 'Professional',
 };
 
 const renderTemplate = (resume: Resume) => {
+  if (resume.templateId === 'london') return <LondonTemplate resume={resume} isPreview />;
+  if (resume.templateId === 'professional') return <ProfessionalTemplate resume={resume} isPreview />;
   if (resume.templateId === 'classic') return <ClassicTemplate resume={resume} isPreview />;
   if (resume.templateId === 'minimal') return <MinimalTemplate resume={resume} isPreview />;
   if (resume.templateId === 'creative') return <CreativeTemplate resume={resume} isPreview />;
@@ -89,7 +95,7 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCard
 
   return (
     <article className="group relative flex flex-col rounded-3xl border border-slate-100 bg-white p-4 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/50">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-slate-50 bg-slate-50/50">
+      <div className="relative aspect-[3/2] overflow-hidden rounded-2xl border border-slate-50 bg-white">
         <div className="absolute inset-0 h-[400%] w-[400%] origin-top-left scale-[0.25] pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
           {renderTemplate(resume)}
         </div>

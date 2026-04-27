@@ -4,7 +4,8 @@ export type TemplateId =
   | 'minimal'
   | 'creative'
   | 'executive'
-  | 'professional';
+  | 'professional'
+  | 'london';
 
 export type SectionType =
   | 'personal_info'

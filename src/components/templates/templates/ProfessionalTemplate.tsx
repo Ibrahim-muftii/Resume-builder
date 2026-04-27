@@ -466,7 +466,7 @@ export default function ProfessionalTemplate({ resume, isPreview, scale }: Templ
         ...customStyles,
         fontFamily: `'${resume.settings?.fontFamily || 'Inter'}', sans-serif`,
         backgroundColor: resume.settings?.backgroundColor || 'white',
-        fontSize: customStyles['--font-size'] as string || '16px',
+        fontSize: (customStyles as any)['--font-size'] || '16px',
       }}
     >
       <div className="max-w-[720px] mx-auto space-y-[16px]">

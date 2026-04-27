@@ -15,6 +15,7 @@ import ExecutiveTemplate from './templates/ExecutiveTemplate';
 import MinimalTemplate from './templates/MinimalTemplate';
 import ModernTemplate from './templates/ModernTemplate';
 import ProfessionalTemplate from './templates/ProfessionalTemplate';
+import LondonTemplate from './templates/LondonTemplate';
 
 type TemplateRow = {
   id: TemplateId;
@@ -32,9 +33,10 @@ const templateRenderer: Record<TemplateId, (resume: Resume) => React.ReactNode> 
   minimal: (resume) => <MinimalTemplate resume={enrichWithDemoData(resume)} isPreview scale={1} />,
   creative: (resume) => <CreativeTemplate resume={enrichWithDemoData(resume)} isPreview scale={1} />,
   executive: (resume) => <ExecutiveTemplate resume={enrichWithDemoData(resume)} isPreview scale={1} />,
+  london: (resume) => <LondonTemplate resume={enrichWithDemoData(resume)} isPreview scale={1} />,
 };
 
-const templateOrder: TemplateId[] = ['professional', 'modern', 'classic', 'minimal', 'creative', 'executive'];
+const templateOrder: TemplateId[] = ['london', 'professional', 'modern', 'classic', 'minimal', 'creative', 'executive'];
 
 export default function TemplatesList() {
   const router = useRouter();
@@ -116,7 +118,7 @@ export default function TemplatesList() {
             key={template.id} 
             className="group relative flex flex-col rounded-[32px] border border-slate-200 bg-white p-4 transition-all hover:border-emerald-300 hover:shadow-2xl hover:shadow-slate-200"
           >
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] border border-slate-100 bg-slate-50">
+            <div className="relative aspect-[3/2] overflow-hidden rounded-[24px] border border-slate-100 bg-white">
               <div className="absolute inset-0 origin-top-left scale-[0.25] w-[400%] h-[400%] pointer-events-none group-hover:scale-[0.26] transition-transform duration-500">
                 {templateRenderer[template.id](null as any)}
               </div>

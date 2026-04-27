@@ -212,6 +212,7 @@ export const resumeSchema = z.object({
     'creative',
     'executive',
     'professional',
+    'london',
   ]),
   settings: resumeSettingsSchema,
   sections: z.array(resumeSectionSchema),

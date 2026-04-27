@@ -21,6 +21,7 @@ import ExecutiveTemplate from './templates/ExecutiveTemplate';
 import MinimalTemplate from './templates/MinimalTemplate';
 import ModernTemplate from './templates/ModernTemplate';
 import ProfessionalTemplate from './templates/ProfessionalTemplate';
+import LondonTemplate from './templates/LondonTemplate';
 
 type TemplateRow = {
   id: TemplateId;
@@ -42,9 +43,10 @@ const templateRenderer: Record<TemplateId, (resume: Resume) => React.ReactNode> 
   minimal: (resume) => <MinimalTemplate resume={enrichWithDemoData(resume)} isPreview scale={1} />,
   creative: (resume) => <CreativeTemplate resume={enrichWithDemoData(resume)} isPreview scale={1} />,
   executive: (resume) => <ExecutiveTemplate resume={enrichWithDemoData(resume)} isPreview scale={1} />,
+  london: (resume) => <LondonTemplate resume={enrichWithDemoData(resume)} isPreview scale={1} />,
 };
 
-const templateOrder: TemplateId[] = ['professional', 'modern', 'classic', 'minimal', 'creative', 'executive'];
+const templateOrder: TemplateId[] = ['london', 'professional', 'modern', 'classic', 'minimal', 'creative', 'executive'];
 
 const getErrorMessage = (payload: unknown, fallback: string): string => {
   if (typeof payload === 'object' && payload !== null && 'error' in payload) {

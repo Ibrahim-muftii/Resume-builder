@@ -10,6 +10,7 @@ import MinimalTemplate from '@/components/templates/templates/MinimalTemplate';
 import CreativeTemplate from '@/components/templates/templates/CreativeTemplate';
 import ExecutiveTemplate from '@/components/templates/templates/ExecutiveTemplate';
 import ProfessionalTemplate from '@/components/templates/templates/ProfessionalTemplate';
+import LondonTemplate from '@/components/templates/templates/LondonTemplate';
 import { DownloadButton } from '@/components/pdf/ResumePDF';
 import { PreviewSidebar } from '@/components/preview/PreviewSidebar';
 import { PreviewPaginator } from '@/components/preview/PreviewPaginator';
@@ -184,6 +185,7 @@ const renderTemplate = (resume: ResumeWithPublic, templateId: TemplateId): React
   if (templateId === 'minimal') return <MinimalTemplate {...props} />;
   if (templateId === 'creative') return <CreativeTemplate {...props} />;
   if (templateId === 'executive') return <ExecutiveTemplate {...props} />;
+  if (templateId === 'london') return <LondonTemplate {...props} />;
   return <ModernTemplate {...props} />;
 };
 

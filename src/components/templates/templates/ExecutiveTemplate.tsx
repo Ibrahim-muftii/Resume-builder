@@ -37,7 +37,6 @@ export default function ExecutiveTemplate({ resume, isPreview, scale }: Template
         <div className="space-y-6">
           {section.items.map((item) => {
             const baseProps = {
-              key: item.id,
               'data-resume-item': true,
               className: "space-y-2",
               style: { breakInside: 'avoid' as const }
@@ -46,7 +45,7 @@ export default function ExecutiveTemplate({ resume, isPreview, scale }: Template
             if (item.type === 'experience') {
               const d = item.data as ExperienceData;
               return (
-                <div {...baseProps}>
+                <div key={item.id} {...baseProps}>
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
                         <h3 className="text-[15px] font-black text-zinc-900 serif tracking-tight">{d.position}</h3>
@@ -75,7 +74,7 @@ export default function ExecutiveTemplate({ resume, isPreview, scale }: Template
             if (item.type === 'education') {
               const d = item.data as EducationData;
               return (
-                <div {...baseProps} className="flex justify-between items-center bg-zinc-50/50 p-4 rounded-sm border border-zinc-100">
+                <div key={item.id} {...baseProps} className="flex justify-between items-center bg-zinc-50/50 p-4 rounded-sm border border-zinc-100">
                    <div className="space-y-0.5">
                       <h3 className="text-[14px] font-black text-zinc-900 italic serif">{d.institution}</h3>
                       <p className="text-[11.5px] font-bold text-zinc-500 uppercase tracking-widest">{d.degree}{d.field ? ` · ${d.field}` : ''}</p>
@@ -90,7 +89,7 @@ export default function ExecutiveTemplate({ resume, isPreview, scale }: Template
             if (item.type === 'skills') {
               const d = item.data as SkillData;
               return (
-                <div {...baseProps} className="inline-flex items-baseline mr-8 mb-1">
+                <div key={item.id} {...baseProps} className="inline-flex items-baseline mr-8 mb-1">
                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-300 mr-2">{d.category || 'Skill'}</span>
                   <span className="text-[13px] font-black text-zinc-800 border-b-[2px] border-zinc-100">{d.name}</span>
                 </div>
@@ -98,7 +97,7 @@ export default function ExecutiveTemplate({ resume, isPreview, scale }: Template
             }
 
             return (
-              <div {...baseProps}>
+              <div key={item.id} {...baseProps}>
                   <h3 className="text-[14px] font-black text-zinc-900 italic">{(item.data as any).name || (item.data as any).title}</h3>
                   <p className="text-[12px] text-zinc-800 leading-relaxed font-medium">{(item.data as any).descriptionTitle || (item.data as any).description || (item.data as any).content}</p>
               </div>
@@ -125,7 +124,14 @@ export default function ExecutiveTemplate({ resume, isPreview, scale }: Template
       {/* Structural Detailing */}
       <div className="absolute top-0 inset-x-0 h-1.5 bg-zinc-900" style={{ backgroundColor: 'var(--primary-color, #18181b)' }} />
 
+<<<<<<< Updated upstream
       <div className="max-w-[7.5in] mx-auto pt-16 px-12 pb-24">
+=======
+      <div className={cn(
+        "mx-auto pt-0 pb-12",
+        isPreview ? "max-w-[720px] px-[44px]" : "max-w-[7.5in] px-12"
+      )}>
+>>>>>>> Stashed changes
         {personalInfoSection && personalInfoSection.items[0]?.type === 'personal_info' && (
           <header className="mb-16">
             {(() => {
